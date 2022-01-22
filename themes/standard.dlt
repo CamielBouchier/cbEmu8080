@@ -20,7 +20,7 @@
 @COMB_HEIGHT   = 18px
 @CHCK_HEIGHT   = 12px
 @SLID_HEIGHT   = 16px
-@SLID_WIDTH    = 70px
+@SLID_WIDTH    = 150px
 @PB_WIDTH      = 64px
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

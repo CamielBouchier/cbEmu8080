@@ -24,8 +24,8 @@ cb_Model::cb_Model()
 
     QSettings* UserSettings = Emu8080->m_UserSettings;
 
-    m_8080   = new cb_8080(this);
-    m_Memory = new cb_Memory(UserSettings->value("Memory/ImageName", "").toString());
+    m_8080    = new cb_8080(this);
+    m_Memory  = new cb_Memory(UserSettings->value("Memory/ImageName", "").toString());
     m_Console = new cb_Console();
 
     for (int Drive = 0; Drive<c_NoDrives; Drive++) 
@@ -73,6 +73,8 @@ cb_Model::cb_Model()
         m_DiskParms << Parms;
         }
     m_DiskArray = new cb_DiskArray(this, m_DiskParms);
+
+    set_delay_cycles();
     }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -85,6 +87,14 @@ cb_Model::~cb_Model()
     delete m_Memory;
     delete m_8080;
     qDebug("End   destructor");
+    }
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+void cb_Model::set_delay_cycles()
+    {
+    QSettings* user_settings = Emu8080->m_UserSettings;
+    m_delay_cycles = user_settings->value("delay_cycles", 0).toInt();
     }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -117,6 +127,11 @@ void cb_Model::Run(bool SingleStep)
             SignalReportSpeed(FMHz);
             Timer.start();
             Ticks = 0;
+            }
+        // Delay loop. Volatile forces read and avoids optimizing away.
+        if (m_delay_cycles)
+            {
+            for (int volatile i=0; i<m_delay_cycles; i++);
             }
         }
     SignalReportSpeed(0);

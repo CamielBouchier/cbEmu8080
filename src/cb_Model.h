@@ -28,6 +28,8 @@ class cb_Model : public QObject
         void    Reset(const bool Hard);
         void    Stop();
 
+        void    set_delay_cycles( /* Argument via user_settings */ );
+
         uint8_t Read   (const uint16_t Address);
         void    Write  (const uint16_t Address, const uint8_t Data);
         uint8_t ReadIO (const uint8_t  Address);
@@ -44,6 +46,7 @@ class cb_Model : public QObject
         
     private :
 
+        int     m_delay_cycles;
         bool    m_Running;
         bool    m_RequestStop;
         bool    m_RequestReset;

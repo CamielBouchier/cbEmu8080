@@ -71,6 +71,7 @@ class cb_emu_8080 : public QApplication
         void OnSelectTraceFile();
         void OnCBDoTrace(const bool Enabled);
         void OnConsoleRefreshRateChanged(const int Rate);  // In Hz.
+        void on_delay_cycles_changed(const int delay_cycles);
 
         static const int c_DisplayMode_Bin = 0;
         static const int c_DisplayMode_Oct = 1;

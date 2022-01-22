@@ -71,6 +71,11 @@ void cb_emu_8080::InitConnects()
     connect(W->PB_HardReset,         &QPushButton::clicked, T, [this] { OnReset(true);  } );
     connect(W->PB_SoftReset,         &QPushButton::clicked, T, [this] { OnReset(false); } );
 
+    connect(W->slider_delay_cycles,      
+            &QSlider::valueChanged,
+            this,
+            &cb_emu_8080::on_delay_cycles_changed);
+
     //
     // Memory related
     //
@@ -689,6 +694,15 @@ void cb_emu_8080::OnSelectTraceFile()
     m_UserSettings->setValue("TraceFileName", SaveFileName);
 
     SetTraceFileName(SaveFileName);
+    }
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+void cb_emu_8080::on_delay_cycles_changed(const int delay_cycles)
+    {
+    qDebug() << "on_delay_cycles_changed:" << delay_cycles;
+    m_UserSettings->setValue("delay_cycles", delay_cycles);
+    m_Model->set_delay_cycles();
     }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
