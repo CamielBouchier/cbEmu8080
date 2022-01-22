@@ -1,0 +1,53 @@
+     1
+     2
+     3 			;- Ref.: 8080-8085_assembly_language_programming__1977__intel__pdf_.pdf, 
+     4 			;  page 177.
+     5
+     6
+     7 0000 06 00		mult:	mvi	b, 0
+     8 0002 1E 09			mvi	e, 9
+     9
+    10 			mult00:
+    11 0004 79			mov	a, c
+    12 0005 1F			rar
+    13 0006 4F			mov	c, a
+    14 0007 1D			dcr	e
+    15 0008 CA 15 00		jz	multend
+    16 000B 78			mov	a, b
+    17 000C D2 10 00		jnc	mult01
+    18 000F 82			add	d
+    19
+    20 			mult01:
+    21 0010 1F			rar
+    22 0011 47			mov	b, a
+    23 0012 C3 04 00		jmp	mult00
+    24
+    25 			multend:
+    26 0015 C9			ret
+    27
+    28
+    29
+    30
+    31
+    32
+
+
+*******************************************************************************
+                                 Symbols table
+*******************************************************************************
+
+Names		Types	Values
+-----		-----	------
+mult		Label	00000h
+mult00		Label	00004h
+mult01		Label	00010h
+multend		Label	00015h
+
+Statistics
+----------
+"Name"	= 0
+"EQU"	= 0
+"SET"	= 0
+Labels	= 4
+
+

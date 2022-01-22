@@ -1,0 +1,33 @@
+     1 			; vim: syntax=asm ts=8 sw=8 sts=8 sr et columns=100 lines=45
+     2
+     3 			;
+     4 			; Intel 8080-8085 Assembly Language Programming 1977.
+     5 			;
+     6 			; Page 4.12 on ORG with a label. 
+     7 			;
+     8
+     9 0000 00		        NOP
+    10 0001 00		        NOP
+    11 0002 00		        NOP
+    12      01 00		LBL     ORG     0100H   ;LBL should have value 3
+    13 0100 00		        NOP
+    14 0101 01 00 01	        LXI     B,LBL
+    15 0104 00		        NOP
+
+
+*******************************************************************************
+                                 Symbols table
+*******************************************************************************
+
+Names		Types	Values
+-----		-----	------
+LBL		Label	00100h
+
+Statistics
+----------
+"Name"	= 0
+"EQU"	= 0
+"SET"	= 0
+Labels	= 1
+
+

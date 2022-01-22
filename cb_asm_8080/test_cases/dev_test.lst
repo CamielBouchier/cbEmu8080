@@ -1,0 +1,178 @@
+     1 			;
+     2 			; $BeginLicense$
+     3 			;
+     4 			; $EndLicense$
+     5 			;
+     6 			;
+     7 			; This bootrecord does load the system from disk and jumps on success to it.
+     8 			;
+     9      00 00		BOOT	EQU	0000H		; Really boot location.
+    10      1F FF		STACK   EQU     1FFFH		; There we have RAM that can grow down.
+    11 			;
+    12 			; 	The IO registers.
+    13 			;
+    14      00 40		TTY     EQU	040H
+    15      00 41		KBDSTAT EQU	041H
+    16      00 42		KBDDATA EQU	042H
+    17      00 FD		BNKSWT0	EQU	0FDH	
+    18      00 FE		BNKSWT1	EQU	0FEH	
+    19      00 FF		BNKSWT2	EQU	0FFH	
+    20      00 00		DRIVE	EQU	000H
+    21      00 01		SECTOR	EQU	DRIVE+1
+    22      00 02		TRACKL	EQU	DRIVE+2
+    23      00 03		TRACKH	EQU	DRIVE+3
+    24      00 04		FDCCMD	EQU	DRIVE+4
+    25      00 05		FDCSTA	EQU	DRIVE+5
+    26      00 06		DMAL   	EQU	DRIVE+6
+    27      00 07		DMAH   	EQU	DRIVE+7
+    28 			;
+    29 			;	CP/M system locations
+    30 			;
+    31      00 40		MSIZE	EQU	64		; Memory in Kbytes.
+    32      B0 00		BIAS	EQU	(MSIZE-20)*1024	; Offset from reference 20K system.
+    33      E4 00		CCP	EQU	3400H+BIAS	; CCCP base.
+    34      FA 00		BIOS	EQU	CCP+1600H	; BIOS base.
+    35      19 00		SIZE	EQU	1900H		; Size of CMP system. (adding 300H bios).
+    36      00 32		SECTS	EQU	SIZE/128	; Number of sectors to load.
+    37 			;
+    38 			; Start of the stuff
+    39 			;
+    40      02 01			ORG	BOOT+201H
+    41 			;
+    42 			                                ; Sector is starting with 1 ( no sector 0 ! )
+    43 0201 01 02 00		LXI	B,2	        ; B,C = track,sector = 0,2.
+    44 0204 16 32			MVI	D,SECTS		; D = Number of sectors to load.
+    45 0206 21 00 E4		LXI	H,CCP		; HL = CCCP base.
+    46 			;
+    47 			;       Read track code.
+    48 			;
+    49 0209 AF		        XRA 	A
+    50 020A D3 00		        OUT 	DRIVE
+    51 020C D3 03			OUT 	TRACKH
+    52 020E 78		RDSEC:  MOV 	A,B
+    53 020F D3 02		        OUT 	TRACKL
+    54 0211 79		 	MOV 	A,C
+    55 0212 D3 01			OUT 	SECTOR
+    56 0214 7D		        MOV 	A,L
+    57 0215 D3 06		        OUT 	DMAL
+    58 0217 7C			MOV 	A,H
+    59 0218 D3 07			OUT 	DMAH
+    60 021A AF			XRA 	A
+    61 021B D3 04		FOOBAR  OUT 	FDCCMD
+    62 021D DB 05			IN  	FDCSTA
+    63 021F FE 00			CPI 	0		; NZ (returned) is error.
+    64 0221 C2 3B 02	        JNZ	ERROR
+    65 0224 15			DCR	D		; Decrement sectors to load.
+    66 0225 CA 4C 02		JZ	SCCS		; Jump into BIOS when all sectors read.
+    67 			        ; Next sector.
+    68 0228 31 80 00		LXI	SP,128		; Use SP for HL+=128
+    69 022B 39			DAD	SP		; HL += 128
+    70 022C 0C			INR	C		; Sector++
+    71 022D 79			MOV 	A,C
+    72 022E FE 1B			CPI	27
+    73 0230 DA 0E 02		JC	RDSEC		; 26 sectors per track. Same track as long C.
+*** Warning 0 in "test_cases/dev_test.asm": Missing quote!
+    74 0233 FE 00		        CPI     ';'             ; Fake for assembler.
+    75 				; Next track. 
+    76 0235 0E 01			MVI	C,1		; Sector = 1
+    77 0237 04		        INR	B		; Track++
+    78 0238 F2 0E 02		JP	RDSEC
+    79 			;
+    80 			; 	Error message.
+    81 			;
+    82 023B 21 55 02	ERROR:	LXI	H,MSGER
+    83 023E 7E		PRTSCR:	MOV	A,M
+    84 023F FE 00			CPI	0
+    85 0241 CA 4A 02		JZ	STOP		; Null terminated.
+    86 0244 D3 40			OUT	TTY
+    87 0246 23			INX	H
+    88 0247 C3 3E 02		JMP	PRTSCR
+    89 			;
+    90 			;	Stop processor on fail.
+    91 			;
+    92 024A F3		STOP:	DI
+    93 024B 76			HLT
+    94 			;
+    95 			;	On success jump to the BIOS.
+    96 			;
+    97 024C C3 00 FA	SCCS:	JMP	BIOS
+    98 			;
+    99 			;	Message strings.
+   100 			;
+   101 024F		MSGXX   DB      'Test.',223
+            54 65 73 74 
+            2E DF 
+   102 0255		MSGER	DB	'Boot failed.',0DH,0AH,0
+            42 6F 6F 74 
+            20 66 61 69 
+            6C 65 64 2E 
+            0D 0A 00 
+   103 			;
+   104 			; Continued code without ORG
+   105 			;
+   106
+   107 0264 FE 00			CPI	0
+   108 0266 CA 4A 02		JZ	STOP		; Null terminated.
+   109 0269 D3 40			OUT	TTY
+   110 026B 23			INX	H
+   111 026C C3 3C 02		JMP	PRTSCR-2
+   112 			;
+   113 			; Some far away ORG
+   114 			;
+   115      10 00		        ORG     1000H
+   116 1000 FE 00			CPI	0
+   117 1002 CA 4A 02		JZ	STOP		; Null terminated.
+   118 1005 D3 40			OUT	TTY
+   119 1007 23			INX	H
+   120 1008 C3 3C 02		JMP	PRTSCR-2
+   121
+   122 			;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   123
+   124 			; vim: syntax=asm ts=8 sw=8 sts=8 sr et columns=100 lines=45 fileencoding=utf-8
+
+
+*******************************************************************************
+                                 Symbols table
+*******************************************************************************
+
+Names		Types	Values
+-----		-----	------
+BOOT		EQU	00000h
+STACK		EQU	01FFFh
+TTY		EQU	00040h
+KBDSTAT		EQU	00041h
+KBDDATA		EQU	00042h
+BNKSWT0		EQU	000FDh
+BNKSWT1		EQU	000FEh
+BNKSWT2		EQU	000FFh
+DRIVE		EQU	00000h
+SECTOR		EQU	00001h
+TRACKL		EQU	00002h
+TRACKH		EQU	00003h
+FDCCMD		EQU	00004h
+FDCSTA		EQU	00005h
+DMAL		EQU	00006h
+DMAH		EQU	00007h
+MSIZE		EQU	00040h
+BIAS		EQU	0B000h
+CCP		EQU	0E400h
+BIOS		EQU	0FA00h
+SIZE		EQU	01900h
+SECTS		EQU	00032h
+RDSEC		Label	0020Eh
+FOOBAR		Label	0021Bh
+ERROR		Label	0023Bh
+PRTSCR		Label	0023Eh
+STOP		Label	0024Ah
+SCCS		Label	0024Ch
+MSGXX		Label	0024Fh
+MSGER		Label	00255h
+
+Statistics
+----------
+"Name"	= 0
+"EQU"	= 22
+"SET"	= 0
+Labels	= 8
+
+

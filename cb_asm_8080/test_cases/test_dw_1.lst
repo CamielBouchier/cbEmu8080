@@ -1,0 +1,106 @@
+     1 			;******************************************************************************
+     2 			;Filename:	test_dw_1.asm
+     3 			;Description:	"DW" assembler directive test.
+     4 			;Copyright(c):
+     5 			;Author(s):	Claude Sylvain
+     6 			;Created:	December 2010
+     7 			;Last modified:	6 January 2012
+     8 			;******************************************************************************
+     9
+    10
+    11 			label1
+    12 0000 00			nop
+    13
+    14 			label2
+    15 0001 00			nop
+    16
+    17
+    18 0002			dw	label2
+            0100 
+    19 0004			dw	label2 - label1
+            0100 
+    20 0006			dw	label2-label1
+            0100 
+    21 0008			dw	label2 - label1, label2 - label1
+            0100 0100 
+    22 000C			dw	label2-label1,label2-label1
+            0100 0100 
+    23
+    24 				;Each characters pair must appear as a Little Endian word.
+    25 				;---------------------------------------------------------
+    26 0010			dw	'ABCD'
+            4241 4443 
+    27 0014			dw	'ABCD'
+            4241 4443 
+    28
+    29 				;Single character must appear as LSB on a Little Endian word.
+    30 				;------------------------------------------------------------
+    31 0018			dw	'A'
+            4100 
+    32 001A			dw	'A'
+            4100 
+    33 001C			dw	'ABC'
+            4241 4300 
+    34 0020			dw	'ABC'
+            4241 4300 
+    35
+    36 0024			dw	'Hello!'
+            6548 6C6C 216F 
+            
+    37 002A			dw	'Hello!', 'Hello!'
+            6548 6C6C 216F 
+            6548 6C6C 216F 
+            
+    38 0036			dw	'Hello!', 'Hello!', label2 - label1
+            6548 6C6C 216F 
+            6548 6C6C 216F 
+            0100 
+    39 0044			dw	'Hello!','Hello!',label2-label1
+            6548 6C6C 216F 
+            6548 6C6C 216F 
+            0100 
+    40 			label3
+    41 0052			dw	'Hello!','Hello!',label2-label1
+            6548 6C6C 216F 
+            6548 6C6C 216F 
+            0100 
+    42 			label4:
+    43 0060			dw	'Hello!','Hello!',label2-label1
+            6548 6C6C 216F 
+            6548 6C6C 216F 
+            0100 
+    44 			label5
+    45 006E			dw	'Hello!','Hello!',label2-label1
+            6548 6C6C 216F 
+            6548 6C6C 216F 
+            0100 
+    46 007C			dw	$, 1
+            7C00 0100 
+    47
+    48
+    49
+    50
+    51
+    52
+
+
+*******************************************************************************
+                                 Symbols table
+*******************************************************************************
+
+Names		Types	Values
+-----		-----	------
+label1		Label	00000h
+label2		Label	00001h
+label3		Label	00052h
+label4		Label	00060h
+label5		Label	0006Eh
+
+Statistics
+----------
+"Name"	= 0
+"EQU"	= 0
+"SET"	= 0
+Labels	= 5
+
+

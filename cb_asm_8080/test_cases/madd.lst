@@ -1,0 +1,65 @@
+     1
+     2
+     3 			;- Ref.: 8080-8085_assembly_language_programming__1977__intel__pdf_.pdf, 
+     4 			;  page 180.
+     5
+     6
+     7 			madd:
+     8 0000 01 13 00		lxi	b, madd02
+     9 0003 21 16 00		lxi	h, madd03
+    10 0006 AF			xra	a
+    11
+    12 			madd00:
+    13 0007 0A			ldax	b
+    14 0008 8E			adc	m
+    15 0009 02			stax	b
+    16 000A 1D			dcr	e
+    17 000B CA 13 00		jz	madd01
+    18
+    19 000E 03			inx	b
+    20 000F 23			inx	h
+    21 0010 C3 07 00		jmp	madd00
+    22 			madd01:
+    23
+    24
+    25 			madd02:
+    26 0013			db	90H
+            90 
+    27 0014			db	0BAH
+            BA 
+    28 0015			db	84H
+            84 
+    29
+    30 			madd03:
+    31 0016			db	8AH
+            8A 
+    32 0017			db	0AFH
+            AF 
+    33 0018			db	32H
+            32 
+    34
+    35
+    36
+    37
+
+
+*******************************************************************************
+                                 Symbols table
+*******************************************************************************
+
+Names		Types	Values
+-----		-----	------
+madd		Label	00000h
+madd00		Label	00007h
+madd01		Label	00013h
+madd02		Label	00013h
+madd03		Label	00016h
+
+Statistics
+----------
+"Name"	= 0
+"EQU"	= 0
+"SET"	= 0
+Labels	= 5
+
+

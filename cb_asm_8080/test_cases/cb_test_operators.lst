@@ -1,0 +1,83 @@
+     1 			; vim: syntax=asm ts=8 sw=8 sts=8 sr et columns=100 lines=45
+     2
+     3 			;
+     4 			; Intel 8080-8085 Assembly Language Programming 1977.
+     5 			;
+     6 			; Page 2.12-2.14
+     7 			;
+     8
+     9 			; All should generate 65D/41H
+    10 0000 06 46		        MVI B,      5+30*2
+    11 0002 06 46		        MVI B,      (25/5)+30*2
+    12 0004 06 07		        MVI B,      5+(-30*-2)
+    13 0006 06 41		        MVI B,      (25 MOD 8) + 64
+    14 0008		        DB       5+30*2
+            46 
+    15 0009		        DB       (25/5)+30*2
+            46 
+    16 000A		        DB       5+(-30*-2)
+            07 
+    17 000B		        DB       (25 MOD 8) + 64
+            41 
+    18      00 15		NUMBR   EQU     00010101B
+    19 000C		        DB      NUMBR SHR 2 ; Should be 5
+            05 
+    20 000D		        DB      NUMBR SHL 1 ; Should be 2AH
+            2A 
+    21      00 95		NEG     EQU     10010101B
+    22 000E		        DB      NEG SHR 2   ; Should be 25H
+            25 
+    23      00 11		NUM1    EQU     00010001B
+    24      00 10		NUM2    EQU     00010000B
+    25 000F		        DB      NOT NUM1
+            EE 
+    26 0010		        DB      NUM1 AND NUM2
+            00 
+    27 0011		        DB      NUM1 AND NUM1
+            01 
+    28 0012		        DB      NUM1 OR NUM2
+            01 
+    29 0013		        DB      NUM2 OR NUM2
+            00 
+    30 0014		        DB      NUM1 XOR NUM2
+            01 
+    31 0015		        DB      NUM1 XOR NUM1
+            00 
+    32 0016		        DB      5 EQ 5
+            01 
+    33 0017		        DB      5 NE 5
+            00 
+    34 0018		        DB      5 GT 4
+            01 
+    35 0019		        DB      4 GE 5
+            00 
+    36 001A		        DB      4 LT 5
+            01 
+    37 001B		        DB      4 LE 5
+            01 
+    38 001C		        DB      HIGH 5643H
+            56 
+    39 001D		        DB      LOW  5643H
+            43 
+    40 			        
+
+
+*******************************************************************************
+                                 Symbols table
+*******************************************************************************
+
+Names		Types	Values
+-----		-----	------
+NUMBR		EQU	00015h
+NEG		EQU	00095h
+NUM1		EQU	00011h
+NUM2		EQU	00010h
+
+Statistics
+----------
+"Name"	= 0
+"EQU"	= 4
+"SET"	= 0
+Labels	= 0
+
+

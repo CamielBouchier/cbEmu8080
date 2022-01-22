@@ -1,0 +1,67 @@
+     1
+     2
+     3 			;- Ref.: 8080-8085_assembly_language_programming__1977__intel__pdf_.pdf, 
+     4 			;  page 185.
+     5
+     6
+     7 0000		dsubminustart	ds	8
+     8      00 07		dsubminu:		equ	$ - 1
+     9
+    10 0008		dsubsbtrastart	ds	8
+    11      00 0F		dsubsbtra		equ	$ - 1
+    12
+    13
+    14 			dsub
+    15 0010 11 07 00		lxi	d, dsubminu
+    16 0013 21 0F 00		lxi	h, dsubsbtra
+    17 0016 0E 08			mvi	c, 8
+    18 0018 37			stc
+    19
+    20 			dsub00
+    21 0019 3E 99			mvi	a, 99H
+    22 001B CE 00			aci	0
+    23 001D 96			sub	m
+    24 001E EB			xchg
+    25 001F 86			add	m
+    26 0020 27			daa
+    27 0021 77			mov	m, a
+    28 0022 EB			xchg
+    29 0023 0D			dcr	c
+    30 0024 CA 2C 00		jz	dsub01
+    31
+    32 0027 13			inx	d
+    33 0028 23			inx	h
+    34 0029 C3 19 00		jmp	dsub00
+    35
+    36 			dsub01
+    37 002C 00			nop
+    38
+    39
+    40
+    41
+    42
+    43
+
+
+*******************************************************************************
+                                 Symbols table
+*******************************************************************************
+
+Names			Types	Values
+-----			-----	------
+dsubminu		EQU	00007h
+dsubsbtra		EQU	0000Fh
+dsubminustart		Label	00000h
+dsubsbtrastart		Label	00008h
+dsub			Label	00010h
+dsub00			Label	00019h
+dsub01			Label	0002Ch
+
+Statistics
+----------
+"Name"	= 0
+"EQU"	= 2
+"SET"	= 0
+Labels	= 5
+
+

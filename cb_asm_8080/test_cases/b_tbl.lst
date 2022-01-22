@@ -1,0 +1,98 @@
+     1
+     2
+     3 			;******************************************************************************
+     4
+     5
+     6      00 00		DUMMY	equ	0
+     7
+     8
+     9 			;	org	0000H
+    10
+    11
+    12 0000 21 11 00	start:	lxi	h, btbl		;Registers H and L will
+    13 							;Point to branch table.
+    14
+    15 0003 1F		gtbit:	rar
+    16 0004 DA 0C 00		jc	getad
+    17 0007 23			inx	h
+    18 0008 23			inx	h
+    19
+    20 0009 C3 03 00		jmp	gtbit
+    21 			;	jmp	toto
+    22 000C 5E		getad:	mov	e, m
+    23 000D 23			inx	h
+    24
+    25 000E 56			mov	d, m
+    26 000F EB			xchg
+    27
+    28 0010 E9			pchl
+    29
+    30
+    31
+    32 0011		btbl:	dw	rout1
+            2100 
+    33 0013			dw	rout2
+            2100 
+    34 0015			dw	rout3
+            2100 
+    35 0017			dw	rout4
+            2100 
+    36 0019			dw	rout5
+            2100 
+    37 001B			dw	rout6
+            2100 
+    38 001D			dw	rout7
+            2100 
+    39 001F			dw	rout8
+            2100 
+    40
+    41
+    42
+    43 			rout1:
+    44 			rout2:
+    45 			rout3:
+    46 			rout4:
+    47 			rout5:
+    48 			rout6:
+    49 			rout7:
+    50 			rout8:
+    51 0021 C3 00 00		jmp	start
+    52
+    53
+    54
+    55
+    56 			;	end
+    57
+    58
+    59
+    60
+
+
+*******************************************************************************
+                                 Symbols table
+*******************************************************************************
+
+Names		Types	Values
+-----		-----	------
+DUMMY		EQU	00000h
+start		Label	00000h
+gtbit		Label	00003h
+getad		Label	0000Ch
+btbl		Label	00011h
+rout1		Label	00021h
+rout2		Label	00021h
+rout3		Label	00021h
+rout4		Label	00021h
+rout5		Label	00021h
+rout6		Label	00021h
+rout7		Label	00021h
+rout8		Label	00021h
+
+Statistics
+----------
+"Name"	= 0
+"EQU"	= 1
+"SET"	= 0
+Labels	= 12
+
+

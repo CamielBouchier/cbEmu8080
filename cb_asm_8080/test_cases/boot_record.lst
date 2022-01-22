@@ -1,0 +1,153 @@
+     1 			;
+     2 			; $BeginLicense$
+     3 			;
+     4 			; $EndLicense$
+     5 			;
+     6 			;
+     7 			; This bootrecord does load the system from disk and jumps on success to it.
+     8 			;
+     9      00 00		BOOT	EQU	0000H		; Really boot location.
+    10      1F FF		STACK   EQU     1FFFH		; There we have RAM that can grow down.
+    11 			;
+    12 			; 	The IO registers.
+    13 			;
+    14      00 40		TTY     EQU	040H
+    15      00 41		KBDSTAT EQU	041H
+    16      00 42		KBDDATA EQU	042H
+    17      00 FD		BNKSWT0	EQU	0FDH	
+    18      00 FE		BNKSWT1	EQU	0FEH	
+    19      00 FF		BNKSWT2	EQU	0FFH	
+    20      00 00		DRIVE	EQU	000H
+    21      00 01		SECTOR	EQU	DRIVE+1
+    22      00 02		TRACKL	EQU	DRIVE+2
+    23      00 03		TRACKH	EQU	DRIVE+3
+    24      00 04		FDCCMD	EQU	DRIVE+4
+    25      00 05		FDCSTA	EQU	DRIVE+5
+    26      00 06		DMAL   	EQU	DRIVE+6
+    27      00 07		DMAH   	EQU	DRIVE+7
+    28 			;
+    29 			;	CP/M system locations
+    30 			;
+    31      00 40		MSIZE	EQU	64		; Memory in Kbytes.
+    32      B0 00		BIAS	EQU	(MSIZE-20)*1024	; Offset from reference 20K system.
+    33      E4 00		CCP	EQU	3400H+BIAS	; CCCP base.
+    34      FA 00		BIOS	EQU	CCP+1600H	; BIOS base.
+    35      19 00		SIZE	EQU	1900H		; Size of CMP system. (adding 300H bios).
+    36      00 32		SECTS	EQU	SIZE/128	; Number of sectors to load.
+    37 			;
+    38 			; Start of the stuff
+    39 			;
+    40      00 00			ORG	BOOT
+    41 			;
+    42 			                                ; Sector is starting with 1 ( no sector 0 ! )
+    43 0000 01 02 00		LXI	B,2	        ; B,C = track,sector = 0,2.
+    44 0003 16 32			MVI	D,SECTS		; D = Number of sectors to load.
+    45 0005 21 00 E4		LXI	H,CCP		; HL = CCCP base.
+    46 			;
+    47 			;       Read track code.
+    48 			;
+    49 0008 AF		        XRA 	A
+    50 0009 D3 00		        OUT 	DRIVE
+    51 000B D3 03			OUT 	TRACKH
+    52 000D 78		RDSEC:  MOV 	A,B
+    53 000E D3 02		        OUT 	TRACKL
+    54 0010 79		 	MOV 	A,C
+    55 0011 D3 01			OUT 	SECTOR
+    56 0013 7D		        MOV 	A,L
+    57 0014 D3 06		        OUT 	DMAL
+    58 0016 7C			MOV 	A,H
+    59 0017 D3 07			OUT 	DMAH
+    60 0019 AF			XRA 	A
+    61 001A D3 04		        OUT 	FDCCMD
+    62 001C DB 05			IN  	FDCSTA
+    63 001E FE 00			CPI 	0		; NZ (returned) is error.
+    64 0020 C2 38 00	        JNZ	ERROR
+    65 0023 15			DCR	D		; Decrement sectors to load.
+    66 0024 CA 49 00		JZ	SCCS		; Jump into BIOS when all sectors read.
+    67 			        ; Next sector.
+    68 0027 31 80 00		LXI	SP,128		; Use SP for HL+=128
+    69 002A 39			DAD	SP		; HL += 128
+    70 002B 0C			INR	C		; Sector++
+    71 002C 79			MOV 	A,C
+    72 002D FE 1B			CPI	27
+    73 002F DA 0D 00		JC	RDSEC		; 26 sectors per track. Same track as long C.
+    74 				; Next track. 
+    75 0032 0E 01			MVI	C,1		; Sector = 1
+    76 0034 04		        INR	B		; Track++
+    77 0035 F2 0D 00		JP	RDSEC
+    78 			;
+    79 			; 	Error message.
+    80 			;
+    81 0038 21 4C 00	ERROR:	LXI	H,MSGER
+    82 003B 7E		PRTSCR:	MOV	A,M
+    83 003C FE 00			CPI	0
+    84 003E CA 47 00		JZ	STOP		; Null terminated.
+    85 0041 D3 40			OUT	TTY
+    86 0043 23			INX	H
+    87 0044 C3 3B 00		JMP	PRTSCR
+    88 			;
+    89 			;	Stop processor on fail.
+    90 			;
+    91 0047 F3		STOP:	DI
+    92 0048 76			HLT
+    93 			;
+    94 			;	On success jump to the BIOS.
+    95 			;
+    96 0049 C3 00 FA	SCCS:	JMP	BIOS
+    97 			;
+    98 			;	Message strings.
+    99 			;
+   100 004C		MSGER	DB	'Boot failed.',0DH,0AH,0
+            42 6F 6F 74 
+            20 66 61 69 
+            6C 65 64 2E 
+            0D 0A 00 
+   101 			;
+   102 			;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   103
+   104 			; vim: syntax=asm ts=8 sw=8 sts=8 sr et columns=100 lines=45 fileencoding=utf-8
+
+
+*******************************************************************************
+                                 Symbols table
+*******************************************************************************
+
+Names		Types	Values
+-----		-----	------
+BOOT		EQU	00000h
+STACK		EQU	01FFFh
+TTY		EQU	00040h
+KBDSTAT		EQU	00041h
+KBDDATA		EQU	00042h
+BNKSWT0		EQU	000FDh
+BNKSWT1		EQU	000FEh
+BNKSWT2		EQU	000FFh
+DRIVE		EQU	00000h
+SECTOR		EQU	00001h
+TRACKL		EQU	00002h
+TRACKH		EQU	00003h
+FDCCMD		EQU	00004h
+FDCSTA		EQU	00005h
+DMAL		EQU	00006h
+DMAH		EQU	00007h
+MSIZE		EQU	00040h
+BIAS		EQU	0B000h
+CCP		EQU	0E400h
+BIOS		EQU	0FA00h
+SIZE		EQU	01900h
+SECTS		EQU	00032h
+RDSEC		Label	0000Dh
+ERROR		Label	00038h
+PRTSCR		Label	0003Bh
+STOP		Label	00047h
+SCCS		Label	00049h
+MSGER		Label	0004Ch
+
+Statistics
+----------
+"Name"	= 0
+"EQU"	= 22
+"SET"	= 0
+Labels	= 6
+
+

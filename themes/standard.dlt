@@ -1,0 +1,508 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; $BeginLicense$
+;
+; $EndLicense$
+;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; Following ones are used as constants.
+
+@BLACK         = #000000
+@TEXT_WHITE    = #C0C0C0
+@DARK_BG       = #303030
+@CTRL_BG       = #404040
+@LIGHT_BG      = #505050
+@BORDER        = #808080
+@RADIUS        = 4px
+@BTTN_HEIGHT   = 18px
+@BTTN_ICONSIZE = 18px
+@COMB_HEIGHT   = 18px
+@CHCK_HEIGHT   = 12px
+@SLID_HEIGHT   = 16px
+@SLID_WIDTH    = 70px
+@PB_WIDTH      = 64px
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+* 
+  {
+  font-size : 13px;
+  }
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+QMainWindow 
+    {
+    background-color : @DARK_BG;
+    color            : @TEXT_WHITE;
+    }
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+QLabel 
+    {
+    color            : @TEXT_WHITE;
+    }
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+QDialog 
+    {
+    background-color : @DARK_BG;
+    color            : @TEXT_WHITE;
+    }
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+QStatusBar 
+    {
+    background-color : @DARK_BG;
+    }
+
+; The label *immediately* below.
+QStatusBar > QLabel 
+    {
+    background-color : @CTRL_BG;
+    color            : @TEXT_WHITE;
+    border           : 1px solid @BORDER;
+    border-radius    : @RADIUS;
+    padding          : 2px;
+    margin-left      : 60px;
+    margin-right     : 60px;
+    margin-bottom    : 2px;
+    margin-top       : 2px;
+    min-width        : 128px;
+    }
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+QMenuBar 
+    {
+    background-color : @DARK_BG;
+    margin-bottom    : 5px;
+    color            : @TEXT_WHITE;
+    }
+
+QMenuBar::item 
+    {
+    spacing          : 40px;
+    padding-top      : 2px;
+    padding-bottom   : 2px;
+    padding-left     : 5px;
+    padding-right    : 5px;
+    background       : @DARK_BG;
+    border           : 1px solid @DARK_BG;
+    border-radius    : @RADIUS;
+    }
+
+QMenuBar::item:selected 
+    {
+    background       : @LIGHT_BG;
+    }
+
+QMenuBar::item:pressed 
+    {
+    background       : @LIGHT_BG;
+    }
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+QMenu 
+    {
+    background       : @CTRL_BG;
+    color            : @TEXT_WHITE;
+    margin           : 2px;       /* Some spacing around the menu */
+    }
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+QMenu::item 
+    {
+    padding-top      : 2px;
+    padding-bottom   : 2px;
+    padding-left     : 25px;    /* Large enough for the checkbox ! */
+    padding-right    : 5px;
+    border           : 1px solid @CTRL_BG;
+    border-radius    : @RADIUS;
+    }
+
+QMenu::separator 
+    {
+    height           : 2px;
+    background       : @BORDER;
+    margin-left      : 20px;
+    margin-right     : 2px;
+    }
+
+QMenu::item:selected 
+    {
+    background       : @DARK_BG;
+    }
+
+; Indicator stuff
+
+QMenu::indicator 
+    {
+    width            : @CHCK_HEIGHT;
+    height           : @CHCK_HEIGHT;
+    }
+
+QMenu::indicator:unchecked 
+    {
+    background-color : @LIGHT_BG;
+    }
+
+QMenu::indicator:non-exclusive:unchecked 
+    {
+    background-color : @LIGHT_BG;
+    }
+
+QMenu::indicator:checked 
+    {
+    background-color : @LIGHT_BG;
+    image            : url(:/cb_emu_8080/Icons/checkbox_checked_13x13_c0.png);
+    }
+
+QMenu::indicator:non-exclusive:checked 
+    {
+    background-color : @LIGHT_BG;
+    image            : url(:/cb_emu_8080/Icons/checkbox_checked_13x13_c0.png);
+    }
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+QCheckBox 
+    {
+    background-color : @DARK_BG;
+    color            : @TEXT_WHITE;
+    }
+
+QCheckBox::indicator 
+    {
+    background-color : @CTRL_BG; 
+    width            : @CHCK_HEIGHT;
+    height           : @CHCK_HEIGHT;
+    border           : 0px solid @BORDER;
+    border-radius    : @RADIUS;
+    }
+
+QCheckBox::indicator:checked 
+    {
+    image            : url(:/cb_emu_8080/Icons/checkbox_checked_13x13_c0.png);
+    }
+
+QCheckBox::indicator:non-exclusive:checked 
+    {
+    image            : url(:/cb_emu_8080/Icons/checkbox_checked_13x13_c0.png);
+    }
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+QToolButton 
+    {
+    background-color : @DARK_BG; 
+    color            : @TEXT_WHITE;
+    border           : 0px solid @BORDER;
+    border-radius    : @RADIUS;
+    }
+
+QToolButton:pressed 
+    {
+    background-color : @LIGHT_BG;
+    }
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+QPushButton 
+    {
+    background-color : @CTRL_BG; 
+    color            : @TEXT_WHITE;
+    border           : 0px solid @BORDER;
+    border-radius    : @RADIUS;
+    padding-left     : 2px;
+    padding-right    : 2px;
+    padding-bottom   : 2px;
+    padding-top      : 2px;
+    width            : @PB_WIDTH;
+    }
+
+QPushButton:pressed 
+    {
+    background-color : @LIGHT_BG;
+    }
+
+QPushButton:disabled 
+    {
+    background-color : @DARK_BG;
+    }
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+QComboBox 
+    {
+    background-color : @CTRL_BG; 
+    color            : @TEXT_WHITE;
+    border           : 0px solid @BORDER;
+    border-radius    : @RADIUS;
+    height           : @COMB_HEIGHT;   
+    padding-top      : 0px;
+    padding-bottom   : 0px;
+    padding-left     : 2px;
+    padding-right    : 2px;
+    }
+
+; It looks like this has not the desired effect. No solution found.
+QComboBox:disabled 
+    {
+    background-color : @CTRL_BG; 
+    color            : @CTRL_BG;
+    font-style       : normal;
+    font-weight      : normal;
+  }
+
+QComboBox::drop-down 
+    {
+    subcontrol-origin   : padding;
+    subcontrol-position : top right;
+    width               : 10px;
+    border-left-style   : none;
+    }
+
+QComboBox::down-arrow 
+    {
+    image            : url(:/cb_emu_8080/Icons/triangle_down_8x8_c0.png);
+    }
+
+QComboBox QAbstractItemView 
+    {
+    background-color : @CTRL_BG; 
+    color            : @TEXT_WHITE;
+    }   
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+QSlider 
+    {
+    background-color : @CTRL_BG; 
+    color            : @TEXT_WHITE;
+    height           : @SLID_HEIGHT;
+    min-width        : @SLID_WIDTH;
+    max-width        : @SLID_WIDTH;
+    border           : 0px solid @BORDER;
+    border-radius    : @RADIUS;
+    }
+
+QSlider::groove:horizontal 
+    {
+    border           : 1px solid @DARK_BG;
+    height           : 6px;
+    margin-right     : 2px;
+    margin-left      : 2px;
+    }
+
+QSlider::handle:horizontal 
+    {
+    background-color : @TEXT_WHITE;  
+    border           : 2px solid @DARK_BG;
+    border-radius    : @RADIUS;
+    width            : 5px;
+    ; Negative margin gets it out of the groove.
+    margin-top       : -4px;
+    margin-bottom    : -4px;
+    }
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+QLineEdit 
+    {
+    background-color : @CTRL_BG; 
+    color            : @TEXT_WHITE;
+    border           : 1px none @DARK_BG;
+    border-radius    : @RADIUS;
+    }
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+QFrame 
+    {
+    background-color : @DARK_BG; 
+    color            : @TEXT_WHITE;
+    border-style     : none;
+    }
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+QGroupBox 
+    {
+    background-color : @DARK_BG; 
+    color            : @TEXT_WHITE;
+    border           : 2px solid @BORDER;
+    border-radius    : @RADIUS;
+    margin-top       : 10px;
+    padding-top      : 5px;
+    }
+
+QGroupBox::title 
+    {
+    subcontrol-origin   : margin;
+    subcontrol-position : top center; /* position at the top center */
+    padding             : 0 3px;
+    }
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+QSplitter::handle:horizontal
+    {
+    width            : 5px;
+    background-color : @CTRL_BG;
+    }
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+QScrollBar 
+    {
+    background-color : @CTRL_BG; 
+    color            : @TEXT_WHITE;
+    }
+
+; Horizontal scrollbars.
+
+QScrollBar:horizontal 
+    {
+    background       : @CTRL_BG;
+    height           : 12px;
+    margin-top       : 0px;
+    margin-bottom    : 0px;
+    margin-left      : 20px;
+    margin-right     : 20px;
+    }
+
+QScrollBar::handle:horizontal 
+    {
+    background       : @DARK_BG;
+    min-width        : 20px;
+    border           : 1px solid @BORDER;
+    border-radius    : @RADIUS;
+    }
+
+QScrollBar::add-line:horizontal 
+    {
+    border-radius       : @RADIUS;
+    background          : @LIGHT_BG;
+    width               : 20px;
+    subcontrol-position : right;
+    subcontrol-origin   : margin;
+    }
+
+QScrollBar::sub-line:horizontal 
+    {
+    border-radius       : @RADIUS;
+    background          : @LIGHT_BG;
+    width               : 20px;
+    subcontrol-position : left;
+    subcontrol-origin   : margin;
+    }
+
+QScrollBar::left-arrow:horizontal, 
+QScrollBar::right-arrow:horizontal 
+    {
+    width            : 4px;
+    height           : 4px;
+    background       : @TEXT_WHITE;
+    }
+
+; Vertical scrollbars.
+
+QScrollBar:vertical 
+    {
+    background       : @CTRL_BG;
+    width            : 12px;
+    margin-top       : 20px;
+    margin-bottom    : 20px;
+    margin-left      : 0px;
+    margin-right     : 0px;
+    }
+
+QScrollBar::handle:vertical 
+    {
+    background       : @DARK_BG;
+    min-height       : 20px;
+    border           : 1px solid @BORDER;
+    border-radius    : @RADIUS;
+    }
+
+QScrollBar::add-line:vertical 
+    {
+    border-radius       : @RADIUS;
+    background          : @LIGHT_BG;
+    height              : 20px;
+    subcontrol-position : bottom;
+    subcontrol-origin   : margin;
+    }
+
+QScrollBar::sub-line:vertical 
+    {
+    border-radius       : @RADIUS;
+    background          : @LIGHT_BG;
+    height              : 20px;
+    subcontrol-position : top;
+    subcontrol-origin   : margin;
+    }
+
+QScrollBar::up-arrow:vertical, 
+QScrollBar::down-arrow:vertical 
+    {
+    width            : 4px;
+    height           : 4px;
+    background       : @TEXT_WHITE;
+    }
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; The central tabwidget is somehow more complicated due to the labels below.
+
+QTabWidget 
+    {
+    background-color : @DARK_BG; 
+    color            : @TEXT_WHITE;
+    }
+
+QTabWidget::pane
+    {
+    border           : 2px solid @BORDER;
+    border-radius    : @RADIUS;
+    }
+
+QTabBar::tab
+    {
+    background-color        : @CTRL_BG; 
+    color                   : @TEXT_WHITE;
+    border                  : 2px solid @BORDER;
+    min-width               : 48px;
+    border-bottom-color     : @DARK_BG;
+    border-top-left-radius  : @RADIUS;
+    border-top-right-radius : @RADIUS;
+    padding                 : 4px;
+    margin-left             : 4px;
+    }
+
+QTabBar::tab:!selected 
+    {
+    background-color : @DARK_BG;
+    margin-top       : 4px; /* make non-selected tabs look smaller */
+    }
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; The widget behind the console. Make sure it is quite dark, if not black.
+
+QWidget#QW_Console 
+	{
+    background-color : #000000;
+    border           : 0px solid @BORDER;
+    border-radius    : 20px;
+    }
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; vim: syntax=css ts=4 sw=4 sts=4 sr et columns=100 lines=45 fileencoding=utf-8

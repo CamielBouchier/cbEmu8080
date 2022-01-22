@@ -1,0 +1,86 @@
+     1
+     2
+     3
+     4
+     5 			label1
+     6 0000 00			nop
+     7
+     8 			label2
+     9 0001 00			nop
+    10
+    11
+    12 0002			db	label2 - label1
+            01 
+    13 0003			db	label2-label1
+            01 
+    14 0004			db	label2 - label1, label2 - label1
+            01 01 
+    15 0006			db	label2-label1,label2-label1
+            01 01 
+    16 0008			db	'Hello!'
+            48 65 6C 6C 
+            6F 21 
+    17 000E			db	'Hello!', 'Hello!'
+            48 65 6C 6C 
+            6F 21 48 65 
+            6C 6C 6F 21 
+            
+    18 001A			db	'Hello!', 'Hello!', label2 - label1
+            48 65 6C 6C 
+            6F 21 48 65 
+            6C 6C 6F 21 
+            01 
+    19 0027			db	'Hello!','Hello!',label2-label1
+            48 65 6C 6C 
+            6F 21 48 65 
+            6C 6C 6F 21 
+            01 
+    20 			label3
+    21 0034			db	'Hello!','Hello!',label2-label1
+            48 65 6C 6C 
+            6F 21 48 65 
+            6C 6C 6F 21 
+            01 
+    22 			label4:
+    23 0041			db	'Hello!','Hello!',label2-label1
+            48 65 6C 6C 
+            6F 21 48 65 
+            6C 6C 6F 21 
+            01 
+    24 			label5
+    25 004E			db	'Hello!','Hello!',label2-label1
+            48 65 6C 6C 
+            6F 21 48 65 
+            6C 6C 6F 21 
+            01 
+    26 005B			db	$, 1
+            5B 01 
+    27
+    28
+    29
+    30
+    31
+    32
+    33
+
+
+*******************************************************************************
+                                 Symbols table
+*******************************************************************************
+
+Names		Types	Values
+-----		-----	------
+label1		Label	00000h
+label2		Label	00001h
+label3		Label	00034h
+label4		Label	00041h
+label5		Label	0004Eh
+
+Statistics
+----------
+"Name"	= 0
+"EQU"	= 0
+"SET"	= 0
+Labels	= 5
+
+

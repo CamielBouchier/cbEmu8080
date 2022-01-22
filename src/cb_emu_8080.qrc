@@ -1,0 +1,14 @@
+<RCC>
+  <qresource prefix="cb_emu_8080" >
+    <file>icons/cb_emu_8080.png</file>
+    <file>icons/reload.png</file>
+    <file>icons/disk.png</file>
+    <file>icons/ram.png</file>
+    <file>icons/checkbox_checked_13x13_c0.png</file>
+    <file>icons/triangle_down_8x8_c0.png</file>
+    <file>icons/circle_green_13x13.png</file>
+    <file>icons/circle_gray_13x13.png</file>
+    <file>icons/circle_blue_13x13.png</file>
+    <file>icons/circle_red_13x13.png</file>
+  </qresource>
+</RCC>

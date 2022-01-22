@@ -1,0 +1,11 @@
+build
+bin
+reference_material
+cb_asm_8080/bin
+cb_asm_8080/build
+cb_asm_8080/Makefile
+/.qmake.stash
+/cb_emu_8080_resource.rc
+/object_script.cb_emu_8080
+/Makefile
+dist_windows

@@ -1,0 +1,50 @@
+     1 			; vim: syntax=asm ts=8 sw=8 sts=8 sr et columns=100 lines=45
+     2
+     3 			;
+     4 			; Intel 8080-8085 Assembly Language Programming 1977.
+     5 			;
+     6 			; Page 2.5
+     7 			;
+     8
+     9 0000 0E BA		HERE:   MVI C,0BAH
+    10 0002 1E 0F		ABC:    MVI E,15
+    11 0004 1E 0F		        MVI E,15D
+    12 0006 3E 3A		LABEL:  MVI A,72Q
+    13 0008 16 F6		NOW:    MVI D,11110110B
+    14 000A 3E 3A		JOS:    MVI A,72O
+    15
+    16 			;
+    17 			; Page 2.6
+    18 			;
+    19
+    20 000C C3 12 00	GO:     JMP $+6
+    21 000F 1E 2A		        MVI E,'*'
+    22 0011		DATE:   DB  'TODAY''S DATE'
+            54 4F 44 41 
+            59 53 20 44 
+            41 54 45 
+    23
+
+
+*******************************************************************************
+                                 Symbols table
+*******************************************************************************
+
+Names		Types	Values
+-----		-----	------
+HERE		Label	00000h
+ABC		Label	00002h
+LABEL		Label	00006h
+NOW		Label	00008h
+JOS		Label	0000Ah
+GO		Label	0000Ch
+DATE		Label	00011h
+
+Statistics
+----------
+"Name"	= 0
+"EQU"	= 0
+"SET"	= 0
+Labels	= 7
+
+

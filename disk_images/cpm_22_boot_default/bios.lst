@@ -1,0 +1,513 @@
+     1                    	;
+     2                    	; $BeginLicense$
+     3                    	;
+     4                    	; $EndLicense$
+     5                    	;
+     6                    	
+     7                    	;
+     8                    	; 	CP/M BIOS for cb_emu_8080.
+     9                    	;	Based on Skeletal CBIOS from CP/M manual.
+    10                    	;
+    11                    	
+    12                    	;
+    13                    	; 	The IO registers.
+    14                    	;
+    15      00 80         	LST	EQU	080H
+    16      00 40         	TTY	EQU	040H
+    17      00 41         	KBDSTAT EQU	041H
+    18      00 42         	KBDDATA EQU	042H
+    19      00 FD         	BNKSWT0	EQU	0FDH	
+    20      00 FE         	BNKSWT1	EQU	0FEH	
+    21      00 FF         	BNKSWT2	EQU	0FFH	
+    22      00 00         	DRIVE	EQU	000H
+    23      00 01         	FSECTOR	EQU	DRIVE+1
+    24      00 02         	FTRACKL	EQU	DRIVE+2
+    25      00 03         	FTRACKH	EQU	DRIVE+3
+    26      00 04         	FDCCMD	EQU	DRIVE+4
+    27      00 05         	FDCSTA	EQU	DRIVE+5
+    28      00 06         	FDMAL   EQU	DRIVE+6
+    29      00 07         	FDMAH   EQU	DRIVE+7
+    30                    	;
+    31                    	;	CP/M system locations
+    32                    	;
+    33      00 40         	MSIZE	EQU	64		; Memory in Kbytes.
+    34      B0 00         	BIAS	EQU	(MSIZE-20)*1024	; Offset from reference 20K system.
+    35      E4 00         	CCP	EQU	3400H+BIAS	; CCCP base.
+    36      EC 06         	BDOS	EQU	CCP+806H	; BDOS base.
+    37      FA 00         	BIOS	EQU	CCP+1600H	; BIOS base.
+    38      16 00         	SIZE	EQU	1600H		; Size of CMP system. Without BIOS.
+    39      00 2C         	SECTS	EQU	SIZE/128	; Number of sectors to load.
+    40                    	;
+    41      00 04         	CDISK	EQU	0004H		; Current disk. (last logged on warm start).
+    42      00 03         	IOBYTE	EQU	0003H		; Interl I/O byte. (see CP/M spec).
+    43                    	
+    44                    	;
+    45                    	;	Start of the stuff.
+    46                    	;
+    47      FA 00         		ORG	BIOS
+    48                    	;
+    49                    	;	CP/M Jump vector table.
+    50                    	;
+    51 FA00 C3 20 FB      		JMP	BOOT		; Cold start.
+    52 FA03 C3 55 FB      	WBOOTE: JMP	WBOOT		; Warm start.
+    53 FA06 C3 C5 FB      		JMP	CONST		; Console status.
+    54 FA09 C3 C8 FB      		JMP	CONIN		; Console character in.
+    55 FA0C C3 D1 FB      		JMP	CONOUT		; Console character out.
+    56 FA0F C3 D5 FB      		JMP	LIST		; List character out.
+    57 FA12 C3 DC FB      		JMP	PUNCH		; Punch character out.
+    58 FA15 C3 DE FB      		JMP	READER		; Reader character in.
+    59 FA18 C3 DF FB      		JMP	HOME		; Move head to home position.
+    60 FA1B C3 E5 FB      		JMP	SELDSK		; Select disk.
+    61 FA1E C3 FD FB      		JMP	SETTRK		; Select track.
+    62 FA21 C3 0A FC      		JMP	SETSEC		; Select sector.
+    63 FA24 C3 27 FC      		JMP	SETDMA		; Set DMA address.
+    64 FA27 C3 33 FC      		JMP	READ		; Read disk.
+    65 FA2A C3 37 FC      		JMP	WRITE		; Write disk.
+    66 FA2D C3 D9 FB      		JMP	LISTST		; Return list status.
+    67 FA30 C3 11 FC      		JMP	SECTRAN		; Sector translate.
+    68                    	
+    69                    	;
+    70                    	;	Fixed data tables for 4 IBM-compatible 8" SD disks.
+    71                    	;	See CP/M Manual.
+    72                    	;
+    73                    	
+    74                    	;	Disk parameter header for disk 00 : ibm-3740
+    75 FA33               	DPBASE:	DW	TRANS,0000H
+            93 FA 00 00 
+    76 FA37               		DW	0000H,0000H
+            00 00 00 00 
+    77 FA3B               		DW	DIRBF,DPBLK
+            4B FC AD FA 
+    78 FA3F               		DW	CHK00,ALL00
+            45 FF CB FC 
+    79                    	;	Disk parameter header for disk 01 : ibm-3740
+    80 FA43               		DW	TRANS,0000H
+            93 FA 00 00 
+    81 FA47               		DW	0000H,0000H
+            00 00 00 00 
+    82 FA4B               		DW	DIRBF,DPBLK
+            4B FC AD FA 
+    83 FA4F               		DW	CHK01,ALL01
+            55 FF EA FC 
+    84                    	;	Disk parameter header for disk 02 : ibm-3740
+    85 FA53               		DW	TRANS,0000H
+            93 FA 00 00 
+    86 FA57               		DW	0000H,0000H
+            00 00 00 00 
+    87 FA5B               		DW	DIRBF,DPBLK
+            4B FC AD FA 
+    88 FA5F               		DW	CHK02,ALL02
+            65 FF 09 FD 
+    89                    	;	Disk parameter header for disk 03 : ibm-3740
+    90 FA63               		DW	TRANS,0000H
+            93 FA 00 00 
+    91 FA67               		DW	0000H,0000H
+            00 00 00 00 
+    92 FA6B               		DW	DIRBF,DPBLK
+            4B FC AD FA 
+    93 FA6F               		DW	CHK03,ALL03
+            75 FF 28 FD 
+    94                    	;	Disk parameter header for disk 04 : 4mb-hd
+    95 FA73               	     	DW	0000H,0000H
+            00 00 00 00 
+    96 FA77               		DW	0000H,0000H
+            00 00 00 00 
+    97 FA7B               		DW	DIRBF,HDBLK
+            4B FC BC FA 
+    98 FA7F               		DW	CHK04,ALL04
+            85 FF 47 FD 
+    99                    	;	Disk parameter header for disk 05 : 4mb-hd
+   100 FA83               	     	DW	0000H,0000H
+            00 00 00 00 
+   101 FA87               		DW	0000H,0000H
+            00 00 00 00 
+   102 FA8B               		DW	DIRBF,HDBLK
+            4B FC BC FA 
+   103 FA8F               		DW	CHK05,ALL05
+            85 FF 46 FE 
+   104                    	
+   105                    	;
+   106                    	;	Sector translate vector for the IBM 8" SD disks.
+   107                    	;	Logical (0..25) to Physical.
+   108                    	;
+   109 FA93               	TRANS:	DB	1,7,13,19
+            01 07 0D 13 
+   110 FA97               		DB	25,5,11,17
+            19 05 0B 11 
+   111 FA9B               		DB	23,3,9,15
+            17 03 09 0F 
+   112 FA9F               		DB	21,2,8,14
+            15 02 08 0E 
+   113 FAA3               		DB	20,26,6,12
+            14 1A 06 0C 
+   114 FAA7               		DB	18,24,4,10
+            12 18 04 0A 
+   115 FAAB               		DB	16,22	
+            10 16 
+   116                    	;
+   117                    	;	Disk parameter block, common to all ibm-3740 8" SD disks.
+   118                    	;       128 bytes/sector. 26 sectors/track. 77 tracks. 2 reserved.
+   119                    	;
+   120 FAAD               	DPBLK:  DW	26		; Sectors per track.
+            1A 00 
+   121 FAAF               		DB	3		; Block shift factor.
+            03 
+   122 FAB0               		DB	7		; Block mask.
+            07 
+   123 FAB1               		DB	0		; Extent mask.
+            00 
+   124 FAB2               		DW	242		; Disk size-1 : ((77-2)*26*128/1024)-1
+            F2 00 
+   125 FAB4               		DW	63		; Directory max
+            3F 00 
+   126 FAB6               		DB	192		; Alloc 0 : 2 bits => 32*2 direntries.(1K BLS)
+            C0 
+   127 FAB7               		DB	0		; Alloc 1
+            00 
+   128 FAB8               		DW	16		; Check size
+            10 00 
+   129 FABA               		DW	2		; Track offset
+            02 00 
+   130                    	;
+   131                    	;       Disk parameter block, common to all 4mb-hd.
+   132                    	;	128 bytes/sector. 32 sectors/track. 1024 tracks. No reserved.
+   133                    	;
+   134 FABC               	HDBLK:  DW	32		; Sectors per track.
+            20 00 
+   135 FABE               		DB	4		; Block shift factor.
+            04 
+   136 FABF               		DB	15		; Block mask.
+            0F 
+   137 FAC0               		DB	0		; Extent mask.
+            00 
+   138 FAC1               		DW	2047		; Disk size-1 : 1024*32*128/2048 - 1
+            FF 07 
+   139 FAC3               		DW	1023		; Directory max.
+            FF 03 
+   140 FAC5               		DB	255		; Alloc 0 : 16 bits => 64*16 direntries.(2K BLS)
+            FF 
+   141 FAC6               		DB	255		; Alloc 1
+            FF 
+   142 FAC7               		DW	0		; Check size.
+            00 00 
+   143 FAC9               		DW	0		; Track offset.
+            00 00 
+   144                    	;
+   145                    	;	Message strings.
+   146                    	;
+   147 FACB               	SIGNON: DB	'64K CP/M Vers. 2.2 (CBIOS V1.2a for cb_emu_8080) ',0DH,0AH,0
+            36 34 4B 20 
+            43 50 2F 4D 
+            20 56 65 72 
+            73 2E 20 32 
+            2E 32 20 28 
+            43 42 49 4F 
+            53 20 56 31 
+            2E 32 61 20 
+            66 6F 72 20 
+            63 62 5F 65 
+            6D 75 5F 38 
+            30 38 30 29 
+            20 0D 0A 00 
+   148 FAFF               	LDERR:	DB	'BIOS: error booting',0DH,0AH,0
+            42 49 4F 53 
+            3A 20 65 72 
+            72 6F 72 20 
+            62 6F 6F 74 
+            69 6E 67 0D 
+            0A 00 
+   149                    	;
+   150                    	;	Print null terminated string.
+   151                    	;	Pointed to by HL.
+   152                    	;
+   153 FB15 7E            	PRTMSG:	MOV	A,M
+   154 FB16 B7            		ORA	A
+   155 FB17 C8            		RZ			; NULL terminated
+   156 FB18 4F            		MOV	C,A
+   157 FB19 CD D1 FB      		CALL	CONOUT		; CONOUT expects in C.
+   158 FB1C 23            		INX	H
+   159 FB1D C3 15 FB      		JMP	PRTMSG
+   160                    	
+   161                    	;
+   162                    	;	Here we go ...
+   163                    	;
+   164 FB20 31 80 00      	BOOT:   LXI	SP,80H		; Use space below buffer for stack.
+   165 FB23 21 CB FA      		LXI	H,SIGNON	; Signon message.
+   166 FB26 CD 15 FB      		CALL	PRTMSG
+   167 FB29 AF            		XRA	A
+   168 FB2A 32 03 00      		STA	IOBYTE		; Clear iobyte.
+   169 FB2D 32 04 00      		STA	CDISK		; Select disk 0.
+   170                    		; Clear 8H to 0080H
+   171 FB30 21 08 00      		LXI	H,8		; Clear 8->127.
+   172 FB33 0E 77         		MVI	C,119
+   173 FB35 77            	CLR:	MOV 	M,A
+   174 FB36 23            		INX	H 
+   175 FB37 0D            		DCR	C
+   176 FB38 C2 35 FB      		JNZ	CLR
+   177                    		; Set a HALT instruction on each of the 7 restart vectors.
+   178 FB3B 3E 76         		MVI	A,76H		; HALT Opcode.
+   179 FB3D 32 08 00      		STA	08H
+   180 FB40 32 10 00      		STA	10H
+   181 FB43 32 18 00      		STA	18H
+   182 FB46 32 20 00      		STA	20H
+   183 FB49 32 28 00      		STA	28H
+   184 FB4C 32 30 00      		STA	30H
+   185 FB4F 32 38 00      		STA	38H
+   186 FB52 C3 A3 FB      		JMP	GOCPM		; Initialize and go to CP/M
+   187                    	;
+   188                    	;	Warm boot : Read the disk until all sectors loaded
+   189                    	;
+   190 FB55 31 80 00      	WBOOT:  LXI	SP,80H		; Use space below buffer for stack.
+   191 FB58 0E 00         		MVI	C,0		; Select disk 0.
+   192 FB5A CD E5 FB      		CALL	SELDSK
+   193 FB5D CD DF FB      		CALL	HOME		; Go to track 00
+   194 FB60 06 2C         		MVI	B,SECTS		; B : Nr sectors to load.
+   195 FB62 0E 00         		MVI	C,0		; C : Current track. Starting 0.
+   196 FB64 16 02         		MVI	D,2		; D : Next sector. Starting 2. (1 = bootrecord)
+   197 FB66 21 00 E4      		LXI	H,CCP		; Base of CP/M.
+   198                    	LOAD1:	; Load one more sector.
+   199 FB69 C5            		PUSH	B
+   200 FB6A D5            		PUSH	D
+   201 FB6B E5            		PUSH	H
+   202 FB6C 4A            		MOV	C,D	
+   203 FB6D CD 0A FC      		CALL	SETSEC		; Set sector address from register c
+   204 FB70 C1            		POP	B		; Recall DMA address to BC
+   205 FB71 C5            		PUSH	B		; Replace on stack for later recall
+   206 FB72 CD 27 FC      		CALL	SETDMA		; Set DMA address from BC
+   207 FB75 CD 33 FC      		CALL	READ		; Read a sector.
+   208 FB78 B7            		ORA	A
+   209 FB79 CA 84 FB      		JZ	LOAD2		; NZ => Error !
+   210                    		; Error branch : message and halt.
+   211 FB7C 21 FF FA      		LXI	H,LDERR	
+   212 FB7F CD 15 FB      		CALL	PRTMSG
+   213 FB82 F3            		DI		
+   214 FB83 76            		HLT
+   215                    		; No error branch : move to next sector.
+   216 FB84 E1            	LOAD2:	POP	H		; HL : DMA
+   217 FB85 11 80 00      		LXI	D,128		;
+   218 FB88 19            		DAD	D   		; DMA += 128 in HL
+   219 FB89 D1            		POP	D		; D : Sector address.
+   220 FB8A C1            		POP	B		; BC : Nr Sectors, Current track.
+   221 FB8B 05            		DCR	B		; Sectors--
+   222 FB8C CA A3 FB      		JZ	GOCPM		; Transfer to CP/M if all loaded.
+   223                    		; More sectors to load.
+   224 FB8F 14            		INR	D
+   225 FB90 7A            		MOV	A,D		; Sector=27 ?
+   226 FB91 FE 1B         		CPI	27
+   227 FB93 DA 69 FB      		JC	LOAD1		; Carry generated if sector<27
+   228                    		; Next track.
+   229 FB96 16 01         		MVI	D,1		; Sector = 1
+   230 FB98 0C            		INR	C		; Track++
+   231 FB99 C5            	     	PUSH	B		; We need to remember B (loop counter)
+   232 FB9A 06 00         	        MVI	B,0		; While B must be 0 as BC is the full track add.
+   233 FB9C CD FD FB      		CALL	SETTRK		; Set track from C
+   234 FB9F C1            	        POP 	B
+   235 FBA0 C3 69 FB      		JMP	LOAD1		
+   236                    	;
+   237                    	;	End of load operation.
+   238                    	;
+   239                    	;	Set parameters and go to CP/M
+   240                    	;
+   241                    	GOCPM:
+   242                    		; Construct JMP WBOOT at 0.
+   243 FBA3 3E C3         		MVI	A, 0C3H		; C3H = JMP
+   244 FBA5 32 00 00      		STA	0
+   245 FBA8 21 03 FA      		LXI	H, WBOOTE
+   246 FBAB 22 01 00      		SHLD	1	
+   247                    		; Construct JMP BDOS at 5.
+   248 FBAE 32 05 00      		STA	5	
+   249 FBB1 21 06 EC      		LXI	H, BDOS	
+   250 FBB4 22 06 00      		SHLD	6	
+   251                    		; Set default DMA address on 80H
+   252 FBB7 01 80 00      		LXI	B, 80H		;DEFAULT DMA ADDRESS IS 80H
+   253 FBBA CD 27 FC      		CALL	SETDMA
+   254                    		; Enable interrupt and go to CP/M's CCP for further processing.
+   255 FBBD FB            		EI	
+   256 FBBE 3A 04 00      		LDA	CDISK
+   257 FBC1 4F            		MOV	C, A		; Have Current disk number in C.
+   258 FBC2 C3 00 E4      		JMP	CCP	
+   259                    	
+   260                    	;
+   261                    	;	Simple I/O handlers.
+   262                    	;
+   263                    	;
+   264                    	;	Console status : Return 0FFH (character ready) or 00H
+   265                    	;
+   266 FBC5 DB 41         	CONST:	IN	KBDSTAT
+   267 FBC7 C9            		RET
+   268                    	;
+   269                    	;	Console character into register A
+   270                    	;
+   271 FBC8 DB 41         	CONIN:	IN	KBDSTAT
+   272 FBCA B7            		ORA	A
+   273 FBCB CA C8 FB      		JZ	CONIN
+   274 FBCE DB 42         		IN	KBDDATA
+   275 FBD0 C9            		RET
+   276                    	;
+   277                    	;	Console character output from register C
+   278                    	;
+   279 FBD1 79            	CONOUT: MOV	A,C
+   280 FBD2 D3 40         		OUT	TTY
+   281 FBD4 C9            		RET
+   282                    	;
+   283                    	;	List character from register C
+   284                    	;
+   285 FBD5 79            	LIST:	MOV	A,C
+   286 FBD6 D3 80         	        OUT     LST
+   287 FBD8 C9            		RET
+   288                    	;
+   289                    	;	Return list status (00h if not ready, 0ffh if ready)
+   290                    	;
+   291                    	LISTST: 
+   292 FBD9 3E FF         		MVI	A,0FFH		; Always ready.
+   293 FBDB C9            		RET
+   294                    	;
+   295                    	;	Punch character from register C
+   296                    	;	XXX CB TODO
+   297                    	;
+   298 FBDC 79            	PUNCH:	MOV	A,C
+   299                    		;OUT	AUXDAT
+   300 FBDD C9            		RET
+   301                    	;
+   302                    	;	Read character into register A from reader device
+   303                    	;	XXX CB TODO
+   304                    	;
+   305                    	READER: 
+   306                    		;IN	AUXDAT
+   307 FBDE C9            		RET
+   308                    	;
+   309                    	;
+   310                    	;	I/O drivers for the disk.i/o drivers for the disk follow
+   311                    	;
+   312 FBDF 01 00 00      	HOME:	LXI	B,0		; Select track 0.
+   313 FBE2 C3 FD FB      		JMP	SETTRK		; We will move to 00 on first read/write.
+   314                    	;
+   315                    	;	Select disk given by register C
+   316                    	;
+   317                    	
+   318                    	SELDSK:	
+   319 FBE5 21 00 00      		LXI	H, 0000H	; Error return code.
+   320 FBE8 79            		MOV	A, C
+   321 FBE9 32 4A FC      		STA	DISKNO
+   322 FBEC FE 06         		CPI	6		; Must be between 0 and 5.
+   323 FBEE D0            		RNC			; NC if 4, 5,...
+   324                    		; Disk number in range.
+   325 FBEF D3 00         		OUT	DRIVE
+   326                    		; Compute proper disk parameter header address.
+   327 FBF1 6F            		MOV	L, A		; L = Disk number 0, 1, 2, 3
+   328 FBF2 26 00         		MVI	H, 0
+   329 FBF4 29            		DAD	H		; *2
+   330 FBF5 29            		DAD	H		; *4
+   331 FBF6 29            		DAD	H		; *8
+   332 FBF7 29            		DAD	H		; *16 (Size of each header)
+   333 FBF8 11 33 FA      		LXI	D, DPBASE
+   334 FBFB 19            		DAD	D		; HL=DPBASE+(DISKNO*16)
+   335 FBFC C9            		RET
+   336                    	;
+   337                    	;	Set track given by register C
+   338                    	;
+   339 FBFD 79            	SETTRK: MOV	A,C
+   340 FBFE 32 44 FC      		STA	TRACK
+   341 FC01 D3 02         		OUT	FTRACKL
+   342 FC03 78            	        MOV	A,B
+   343 FC04 32 45 FC      		STA	TRACK+1
+   344 FC07 D3 03         		OUT	FTRACKH
+   345 FC09 C9            		RET
+   346                    	;
+   347                    	;	Set sector given by register C
+   348                    	;
+   349 FC0A 79            	SETSEC: MOV	A,C
+   350 FC0B 32 46 FC      		STA	SECTOR
+   351 FC0E D3 01         		OUT	FSECTOR
+   352 FC10 C9            		RET
+   353                    	;
+   354                    	;	Translate the sector given by BC using the
+   355                    	;	translate table given by DE. (DE=0 => No translation)
+   356                    	;
+   357                    	SECTRAN:
+   358 FC11 7A            		MOV	A,D		
+   359 FC12 B2            		ORA	D
+   360 FC13 C2 21 FC      		JNZ	SECT1
+   361 FC16 7B            		MOV	A,E
+   362 FC17 B3            		ORA	E
+   363 FC18 C2 21 FC      		JNZ	SECT1
+   364                    		; Return untranslated branch.
+   365 FC1B 69            		MOV	L,C
+   366 FC1C 60            		MOV	H,B
+   367 FC1D 2C            		INR	L		; Logical 0 => Physical 1.
+   368 FC1E C0            		RNZ
+   369 FC1F 24            		INR	H
+   370 FC20 C9            		RET
+   371                    		; Return translated branch.
+   372 FC21 EB            	SECT1:	XCHG			; HL => Translate.
+   373 FC22 09            		DAD	B		; HL += Sector
+   374 FC23 6E            		MOV	L, M		; Look it up.
+   375 FC24 26 00         		MVI	H, 0		; HL => Translated sector.
+   376 FC26 C9            		RET		
+   377                    	;
+   378                    	;	Set DMA address given by registers BC
+   379                    	;
+   380 FC27 69            	SETDMA:	MOV	L, C		
+   381 FC28 60            		MOV	H, B	
+   382 FC29 22 48 FC      		SHLD	DMAAD
+   383 FC2C 7D            		MOV	A,L
+   384 FC2D D3 06         		OUT	FDMAL
+   385 FC2F 7C            		MOV	A,H
+   386 FC30 D3 07         		OUT	FDMAH
+   387 FC32 C9            		RET
+   388                    	;
+   389                    	;	Perform read operation.
+   390                    	;
+   391 FC33 AF            	READ:	XRA	A		; 0 is read command.
+   392 FC34 C3 39 FC      		JMP	WAITIO	
+   393                    	;
+   394                    	;	Perform a write operation.
+   395                    	;
+   396 FC37 3E 01         	WRITE:	MVI	A,1		; 1 is write command.
+   397                    	;
+   398                    	;	Enter here from read and write to perform the actual i/o
+   399                    	;	operation.  return a 00h in register a if the operation completes
+   400                    	;	properly, and 01h if an error occurs during the read or write
+   401                    	;
+   402 FC39 D3 04         	WAITIO: OUT	FDCCMD
+   403 FC3B DB 04         	WAIT:	IN	FDCCMD
+   404 FC3D B7            		ORA	A		; Ready when not 0.
+   405 FC3E CA 3B FC      		JZ	WAIT
+   406 FC41 DB 05         		IN	FDCSTA		; Status of i/o operation -> A
+   407 FC43 C9            		RET
+   408                    	
+   409                    	;
+   410                    	;	The remainder of the CBIOS is reserved unitialized
+   411                    	;	DATA area ,and does not need to be a part of the
+   412                    	;	system memory image (the space must be available,
+   413                    	;	however, between "BEGDAT" and "ENDDAT").
+   414                    	;
+   415                    	
+   416                    	TRACK:	DS	2
+   417                    	SECTOR:	DS	2
+   418                    	DMAAD:	DS	2
+   419                    	DISKNO:	DS	1
+   420                    	;
+   421                    	;	SCRATCH RAM AREA FOR BDOS USE
+   422      FC 4B         	BEGDAT	EQU	$
+   423                    	DIRBF:	DS	128	 	; Scratch directory area.
+   424                    	ALL00:	DS	31	 	; Allocation vectors 0.
+   425                    	ALL01:	DS	31	 	; Allocation vectors 1.
+   426                    	ALL02:	DS	31	 	; Allocation vectors 2.
+   427                    	ALL03:	DS	31	 	; Allocation vectors 3.
+   428                    	ALL04:	DS	255 		; Allocation vectors 3.
+   429                    	ALL05:	DS	255	 	; Allocation vectors 3.
+   430                    	CHK00:	DS	16		; Check vector 0.
+   431                    	CHK01:	DS	16		; Check vector 1.
+   432                    	CHK02:	DS	16		; Check vector 2.
+   433                    	CHK03:	DS	16		; Check vector 3.
+   434                    	CHK04:	DS	0       	; Check vector 4.	// Not needed for fixed.
+   435                    	CHK05:	DS	0       	; Check vector 5.	// Not needed for fixed.
+   436                    	;
+   437      FF 85         	ENDDAT	EQU	$	 
+   438      03 3A         	DATSIZ	EQU	$-BEGDAT;	; Size of data area.
+   439                    		END
+   440                    	
+   441                    	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   442                    	
+   443                    	; vim: syntax=asm ts=8 sw=8 sts=8 sr et columns=80 lines=45 fileencoding=utf-8

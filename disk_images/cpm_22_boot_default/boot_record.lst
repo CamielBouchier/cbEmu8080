@@ -1,0 +1,109 @@
+     1                    	;
+     2                    	; $BeginLicense$
+     3                    	;
+     4                    	; $EndLicense$
+     5                    	;
+     6                    	
+     7                    	;
+     8                    	; This bootrecord does load the system from disk and jumps on success to it.
+     9                    	;
+    10      00 00         	BOOT	EQU	0000H		; Really boot location.
+    11      1F FF         	STACK   EQU     1FFFH		; There we have RAM that can grow down.
+    12                    	;
+    13                    	; 	The IO registers.
+    14                    	;
+    15      00 40         	TTY     EQU	040H
+    16      00 41         	KBDSTAT EQU	041H
+    17      00 42         	KBDDATA EQU	042H
+    18      00 FD         	BNKSWT0	EQU	0FDH	
+    19      00 FE         	BNKSWT1	EQU	0FEH	
+    20      00 FF         	BNKSWT2	EQU	0FFH	
+    21      00 00         	DRIVE	EQU	000H
+    22      00 01         	SECTOR	EQU	DRIVE+1
+    23      00 02         	TRACKL	EQU	DRIVE+2
+    24      00 03         	TRACKH	EQU	DRIVE+3
+    25      00 04         	FDCCMD	EQU	DRIVE+4
+    26      00 05         	FDCSTA	EQU	DRIVE+5
+    27      00 06         	DMAL   	EQU	DRIVE+6
+    28      00 07         	DMAH   	EQU	DRIVE+7
+    29                    	;
+    30                    	;	CP/M system locations
+    31                    	;
+    32      00 40         	MSIZE	EQU	64		; Memory in Kbytes.
+    33      B0 00         	BIAS	EQU	(MSIZE-20)*1024	; Offset from reference 20K system.
+    34      E4 00         	CCP	EQU	3400H+BIAS	; CCCP base.
+    35      FA 00         	BIOS	EQU	CCP+1600H	; BIOS base.
+    36      19 00         	SIZE	EQU	1900H		; Size of CMP system. (adding 300H bios).
+    37      00 32         	SECTS	EQU	SIZE/128	; Number of sectors to load.
+    38                    	;
+    39                    	; Start of the stuff
+    40                    	;
+    41      00 00         		ORG	BOOT
+    42                    	;
+    43                    	                                ; Sector is starting with 1 ( no sector 0 ! )
+    44 0000 01 02 00      		LXI	B,2	        ; B,C = track,sector = 0,2.
+    45 0003 16 32         		MVI	D,SECTS		; D = Number of sectors to load.
+    46 0005 21 00 E4      		LXI	H,CCP		; HL = CCCP base.
+    47                    	;
+    48                    	;       Read track code.
+    49                    	;
+    50 0008 AF            	        XRA 	A
+    51 0009 D3 00         	        OUT 	DRIVE
+    52 000B D3 03         		OUT 	TRACKH
+    53 000D 78            	RDSEC:  MOV 	A,B
+    54 000E D3 02         	        OUT 	TRACKL
+    55 0010 79            	 	MOV 	A,C
+    56 0011 D3 01         		OUT 	SECTOR
+    57 0013 7D            	        MOV 	A,L
+    58 0014 D3 06         	        OUT 	DMAL
+    59 0016 7C            		MOV 	A,H
+    60 0017 D3 07         		OUT 	DMAH
+    61 0019 AF            		XRA 	A
+    62 001A D3 04         	        OUT 	FDCCMD
+    63 001C DB 05         		IN  	FDCSTA
+    64 001E FE 00         		CPI 	0		; NZ (returned) is error.
+    65 0020 C2 38 00      	        JNZ	ERROR
+    66 0023 15            		DCR	D		; Decrement sectors to load.
+    67 0024 CA 49 00      		JZ	SCCS		; Jump into BIOS when all sectors read.
+    68                    	        ; Next sector.
+    69 0027 31 80 00      		LXI	SP,128		; Use SP for HL+=128
+    70 002A 39            		DAD	SP		; HL += 128
+    71 002B 0C            		INR	C		; Sector++
+    72 002C 79            		MOV 	A,C
+    73 002D FE 1B         		CPI	27
+    74 002F DA 0D 00      		JC	RDSEC		; 26 sectors per track. Same track as long C.
+    75                    		; Next track. 
+    76 0032 0E 01         		MVI	C,1		; Sector = 1
+    77 0034 04            		INR	B		; Track++
+    78 0035 F2 0D 00      		JP	RDSEC
+    79                    	;
+    80                    	; 	Error message.
+    81                    	;
+    82 0038 21 4C 00      	ERROR:	LXI	H,MSGER
+    83 003B 7E            	PRTSCR:	MOV	A,M
+    84 003C FE 00         		CPI	0
+    85 003E CA 47 00      		JZ	STOP		; Null terminated.
+    86 0041 D3 40         		OUT	TTY
+    87 0043 23            		INX	H
+    88 0044 C3 3B 00      		JMP	PRTSCR
+    89                    	;
+    90                    	;	Stop processor on fail.
+    91                    	;
+    92 0047 F3            	STOP:	DI
+    93 0048 76            		HLT
+    94                    	;
+    95                    	;	On success jump to the BIOS.
+    96                    	;
+    97 0049 C3 00 FA      	SCCS:	JMP	BIOS
+    98                    	;
+    99                    	;	Message strings.
+   100                    	;
+   101 004C               	MSGER	DB	'Boot failed.',0DH,0AH,0
+            42 6F 6F 74 
+            20 66 61 69 
+            6C 65 64 2E 
+            0D 0A 00 
+   102                    	;
+   103                    	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   104                    	
+   105                    	; vim: syntax=asm ts=8 sw=8 sts=8 sr et columns=80 lines=45 fileencoding=utf-8

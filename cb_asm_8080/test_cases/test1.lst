@@ -1,0 +1,443 @@
+     1
+     2
+     3 			;
+     4 			;Copyright (c) <2007-2011> <jay.cotton@oracle.com>
+     5 			;
+     6 			;Permission is hereby granted, free of charge, to any person
+     7 			;obtaining a copy of this software and associated documentation
+     8 			;files (the "Software"), to deal in the Software without
+     9 			;restriction, including without limitation the rights to use,
+    10 			;copy, modify, merge, publish, distribute, sublicense, and/or sell
+    11 			;copies of the Software, and to permit persons to whom the
+    12 			;Software is furnished to do so, subject to the following
+    13 			;conditions:
+    14 			;
+    15 			;The above copyright notice and this permission notice shall be
+    16 			;included in all copies or substantial portions of the Software.
+    17 			;
+    18 			;THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+    19 			;EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+    20 			;OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+    21 			;NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+    22 			;HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+    23 			;WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    24 			;FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+    25 			;OTHER DEALINGS IN THE SOFTWARE.
+    26 			;
+    27
+    28
+    29 			; Test file used to checkout the assembler 
+    30
+    31
+    32 				;- Not standard, but supported if asm8080 is build with
+    33 				;  support for language extension.
+    34 				;
+    35 0000			DB	'Test Test Test'
+            54 65 73 74 
+            20 54 65 73 
+            74 20 54 65 
+            73 74 
+    36
+    37 000E			DB	'Test Test Test'
+            54 65 73 74 
+            20 54 65 73 
+            74 20 54 65 
+            73 74 
+    38
+    39
+    40      00 1C		FRONT	EQU	$
+    41      00 1C		BACK	EQU	FRONT
+    42      00 07		XYZ	EQU	7
+    43
+    44
+    45 001C 78		TEST	MOV A,B  
+    46 001D 79		TES1	MOV A,C  
+    47
+    48 				;This should load H with a value of 000Dh.
+    49 				;
+    50 001E 21 0D 00		LXI	H,((XYZ + 20)+TEST)/4
+    51
+    52 0021 7A			MOV A,D  
+    53 0022 7B			MOV A,E  
+    54 0023 7C			MOV A,H  
+    55 0024 7D			MOV A,L  
+    56 0025 7E			MOV A,M  
+    57 0026 47			MOV B,A  
+    58 0027 41			MOV B,C  
+    59 0028 42			MOV B,D  
+    60 0029 43			MOV B,E  
+    61 002A 44			MOV B,H  
+    62 002B 45			MOV B,L  
+    63 002C 46			MOV B,M  
+    64 002D 4F			MOV C,A  
+    65 002E 48			MOV C,B  
+    66 002F 4A			MOV C,D  
+    67 0030 4B			MOV C,E  
+    68 0031 4C			MOV C,H  
+    69 0032 4D			MOV C,L  
+    70 0033 4E			MOV C,M  
+    71 0034 57			MOV D,A  
+    72 0035 50			MOV D,B  
+    73 0036 51			MOV D,C  
+    74 0037 53			MOV D,E  
+    75 0038 54			MOV D,H  
+    76 0039 55			MOV D,L  
+    77 003A 56			MOV D,M  
+    78 003B 5F			MOV E,A  
+    79 003C 58			MOV E,B  
+    80 003D 59			MOV E,C  
+    81 003E 5A			MOV E,D  
+    82 003F 5C			MOV E,H  
+    83 0040 5D			MOV E,L  
+    84 0041 5E			MOV E,M  
+    85 0042 67			MOV H,A  
+    86 0043 60			MOV H,B  
+    87 0044 61			MOV H,C  
+    88 0045 62			MOV H,D  
+    89 0046 63			MOV H,E  
+    90 0047 65			MOV H,L  
+    91 0048 66			MOV H,M  
+    92 0049 6F			MOV L,A  
+    93 004A 68			MOV L,B  
+    94 004B 69			MOV L,C  
+    95 004C 6A			MOV L,D  
+    96 004D 6B			MOV L,E  
+    97 004E 6C			MOV L,H  
+    98 004F 6E			MOV L,M  
+    99 0050 77			MOV M,A  
+   100 0051 70			MOV M,B  
+   101 0052 71			MOV M,C  
+   102 0053 72			MOV M,D  
+   103 0054 73			MOV M,E  
+   104 0055 74			MOV M,H  
+   105 0056 75			MOV M,L  
+   106 0057 3E 19		TEST2	MVI A,25
+   107 0059 06 02			MVI B,2
+   108 005B 0E 02			MVI C,2
+   109 005D 16 02		TEST4	MVI D,2
+   110 005F 16 54			MVI D,'T'
+   111 0061 16 07			MVI D,XYZ
+   112 0063 1E 02			MVI E,2
+   113 0065 26 02			MVI H,2
+   114 0067 2E 02			MVI L,2
+   115 0069 36 02			MVI M,2
+   116 			;TEST3	LXI B,0x2233 
+   117 006B 01 33 22	TEST3	LXI B,2233h
+   118 			;	LXI D,0x2233 
+   119 006E 11 33 22		LXI D,2233h
+   120 			;	LXI H,0x2233 
+   121 0071 21 33 22		LXI H,2233h
+   122 			;	LXI SP,0x2233 
+   123 0074 31 33 22		LXI SP,2233h
+   124 0077 31 5D 00		LXI SP,TEST4
+   125 			;	LXI SP,"DF"
+   126 			;	LDA 0x1234
+   127 007A 3A 34 12		LDA 1234h
+   128 007D 3A 6B 00		LDA TEST3 
+   129 			;	LDA "xyay"
+   130 0080 3A 6C 00		LDA 'l' 
+   131 0083 3A 83 00		LDA $
+   132 0086 3A 8E 00		LDA $+8
+   133 0089 3A 81 00		LDA $-8
+   134 008C 3A E0 00		LDA $+'T'
+   135 008F 3A FA 00		LDA $+TEST3	
+   136 0092 3A 27 00		LDA $-TEST3	
+   137 			;	STA 0x1234
+   138 0095 32 34 12		STA 1234h
+   139 0098 32 6B 00		STA TEST3 
+   140 			;	STA "xyay"
+   141 009B 32 6C 00		STA 'l' 
+   142 009E 32 9E 00		STA $
+   143 00A1 32 A9 00		STA $+8
+   144 00A4 32 9C 00		STA $-8
+   145 00A7 32 FB 00		STA $+'T'
+   146 00AA 32 15 01		STA $+TEST3	
+   147 00AD 32 42 00		STA $-TEST3	
+   148 			;	LHLD 0x1234
+   149 00B0 2A 34 12		LHLD 1234h
+   150 00B3 2A 6B 00		LHLD TEST3 
+   151 			;	LHLD "xyay"
+   152 00B6 2A 6C 00		LHLD 'l' 
+   153 00B9 2A B9 00		LHLD $
+   154 00BC 2A C4 00		LHLD $+8
+   155 00BF 2A B7 00		LHLD $-8
+   156 00C2 2A 16 01		LHLD $+'T'
+   157 00C5 2A 30 01		LHLD $+TEST3	
+   158 00C8 2A 5D 00		LHLD $-TEST3	
+   159 			;	SHLD 0x1234
+   160 00CB 22 34 12		SHLD 1234h
+   161 00CE 22 6B 00		SHLD TEST3 
+   162 			;	SHLD "xyay"
+   163 00D1 22 6C 00		SHLD 'l' 
+   164 00D4 22 D4 00		SHLD $
+   165 00D7 22 DF 00		SHLD $+8
+   166 00DA 22 D2 00		SHLD $-8
+   167 00DD 22 31 01		SHLD $+'T'
+   168 00E0 22 4B 01		SHLD $+TEST3	
+   169 00E3 22 78 00		SHLD $-TEST3	
+   170 00E6 0A			LDAX B 
+   171 00E7 1A			LDAX D 
+   172 00E8 02			STAX B 
+   173 00E9 12			STAX D 
+   174 00EA EB			XCHG 
+   175 00EB 87			ADD A  
+   176 00EC 80			ADD B  
+   177 00ED 81			ADD C  
+   178 00EE 82			ADD D  
+   179 00EF 83			ADD E  
+   180 00F0 84			ADD H  
+   181 00F1 85			ADD L  
+   182 00F2 86			ADD M  
+   183 00F3 C6 F3			ADI low $
+   184 00F5 C6 04			ADI 4 
+   185 			;	ADI 0x45   
+   186 00F7 C6 45			ADI 45h
+   187 00F9 C6 54			ADI 'T'   
+   188 00FB C6 07			ADI XYZ
+   189 00FD 8F			ADC A   
+   190 00FE 88			ADC B   
+   191 00FF 89			ADC C   
+   192 0100 8A			ADC D   
+   193 0101 8B			ADC E   
+   194 0102 8C			ADC H   
+   195 0103 8D			ADC L   
+   196 0104 8E			ADC M   
+   197 			;	ACI    $
+   198 0105 CE 04			ACI 4 
+   199 			;	ACI 0x45   
+   200 0107 CE 45			ACI 45h
+   201 0109 CE 54			ACI 'T'   
+   202 010B CE 07			ACI XYZ
+   203 010D 97			SUB A  
+   204 010E 90			SUB B  
+   205 010F 91			SUB C  
+   206 0110 92			SUB D  
+   207 0111 93			SUB E  
+   208 0112 94			SUB H  
+   209 0113 95			SUB L  
+   210 0114 96			SUB M  
+   211 0115 D6 15			SUI    low $
+   212 0117 D6 04			SUI 4 
+   213 			;	SUI 0x45   
+   214 0119 D6 45			SUI 45h
+   215 011B D6 54			SUI 'T'   
+   216 011D D6 07			SUI XYZ
+   217 011F 9F			SBB A  
+   218 0120 98			SBB B  
+   219 0121 99			SBB C  
+   220 0122 9A			SBB D  
+   221 0123 9B			SBB E  
+   222 0124 9C			SBB H  
+   223 0125 9D			SBB L  
+   224 0126 9E			SBB M  
+   225 0127 DE 01			SBI    high $
+   226 0129 DE 04			SBI 4 
+   227 			;	SBI 0x45   
+   228 012B DE 45			SBI 45h
+   229 012D DE 54			SBI 'T'   
+   230 012F DE 07			SBI XYZ
+   231 0131 3C			INR A 
+   232 0132 04			INR B 
+   233 0133 0C			INR C 
+   234 0134 14			INR D 
+   235 0135 1C			INR E 
+   236 0136 24			INR H 
+   237 0137 2C			INR L 
+   238 0138 34			INR M 
+   239 0139 3D			DCR A 
+   240 013A 05			DCR B 
+   241 013B 0D			DCR C 
+   242 013C 15			DCR D 
+   243 013D 1D			DCR E 
+   244 013E 25			DCR H 
+   245 013F 2D			DCR L 
+   246 0140 35			DCR M 
+   247 0141 03			INX B  
+   248 0142 23			INX H  
+   249 0143 13			INX D  
+   250 0144 33			INX SP 
+   251 0145 0B			DCX B  
+   252 0146 2B			DCX H  
+   253 0147 1B			DCX D  
+   254 0148 3B			DCX SP 
+   255 0149 09			DAD B  
+   256 014A 29			DAD H  
+   257 014B 19			DAD D  
+   258 014C 39			DAD SP 
+   259 014D 27			DAA  
+   260 014E A7			ANA A  
+   261 014F A0			ANA B  
+   262 0150 A1			ANA C  
+   263 0151 A2			ANA D  
+   264 0152 A3			ANA E  
+   265 0153 A4			ANA H  
+   266 0154 A5			ANA L  
+   267 0155 A6			ANA M  
+   268 0156 E6 56			ANI    low $
+   269 0158 E6 04			ANI 4 
+   270 			;	ANI 0x45   
+   271 015A E6 45			ANI 45h
+   272 015C E6 54			ANI 'T'   
+   273 015E E6 07			ANI XYZ
+   274 0160 B7			ORA A 
+   275 0161 B0			ORA B 
+   276 0162 B1			ORA C 
+   277 0163 B2			ORA D 
+   278 0164 B3			ORA E 
+   279 0165 B4			ORA H 
+   280 0166 B5			ORA L 
+   281 0167 B6			ORA M 
+   282 0168 AF			XRA A  
+   283 0169 A8			XRA B  
+   284 016A A9			XRA C  
+   285 016B AA			XRA D  
+   286 016C AB			XRA E  
+   287 016D AC			XRA H  
+   288 016E AD			XRA L  
+   289 016F AE			XRA M  
+   290 0170 EE 01			XRI    high $
+   291 0172 EE 04			XRI 4 
+   292 			;	XRI 0x45   
+   293 0174 EE 45			XRI 45h
+   294 0176 EE 54			XRI 'T'   
+   295 0178 EE 07			XRI XYZ
+   296 017A BF			CMP A   
+   297 017B B8			CMP B   
+   298 017C B9			CMP C   
+   299 017D BA			CMP D   
+   300 017E BB			CMP E   
+   301 017F BC			CMP H   
+   302 0180 BD			CMP L   
+   303 0181 BE			CMP M   
+   304 0182 FE 82			CPI    low $
+   305 0184 FE 04			CPI 4 
+   306 			;	CPI 0x45   
+   307 0186 FE 45			CPI 45h
+   308 0188 FE 54			CPI 'T'   
+   309 018A FE 07			CPI XYZ
+   310 018C 07			RLC   
+   311 018D 0F			RRC    
+   312 018E 17			RAL 
+   313 018F 1F			RAR    
+   314 0190 2F			CMA    
+   315 0191 3F			CMC  
+   316 0192 37			STC   
+   317 			;	JMP 0x1234
+   318 0193 C3 34 12		JMP 1234h
+   319 0196 C3 6B 00		JMP TEST3 
+   320 			;	JMP "xyay"
+   321 0199 C3 6C 00		JMP 'l' 
+   322 019C C3 9C 01		JMP $
+   323 019F C3 A7 01		JMP $+8
+   324 01A2 C3 9A 01		JMP $-8
+   325 01A5 C3 F9 01		JMP $+'T'
+   326 01A8 C3 13 02		JMP $+TEST3	
+   327 01AB C3 40 01		JMP $-TEST3	
+   328 			;	JNZ 0x1234
+   329 01AE C2 34 12		JNZ 1234h
+   330 01B1 CA 6B 00		JZ TEST3 
+   331 			;	JNC "xyay"
+   332 01B4 DA 6C 00		JC 'l' 
+   333 01B7 E2 B7 01		JPO $
+   334 01BA EA C2 01		JPE $+8
+   335 01BD F2 B5 01		JP $-8
+   336 01C0 FA 14 02		JM $+'T'
+   337 			;	CALL 0x1234
+   338 01C3 CD 34 12		CALL 1234h
+   339 01C6 CD 6B 00		CALL TEST3 
+   340 			;	CALL "xyay"
+   341 01C9 CD 6C 00		CALL 'l' 
+   342 01CC CD CC 01		CALL $
+   343 01CF CD D7 01		CALL $+8
+   344 01D2 CD CA 01		CALL $-8
+   345 01D5 CD 29 02		CALL $+'T'
+   346 01D8 CD 43 02		CALL $+TEST3	
+   347 			;	CNZ 0x1234
+   348 01DB C4 34 12		CNZ 1234h
+   349 01DE CC 6B 00		CZ TEST3 
+   350 			;	CNC "xyay"
+   351 01E1 DC 6C 00		CC 'l' 
+   352 01E4 E4 E4 01		CPO $
+   353 01E7 EC EF 01		CPE $+8
+   354 01EA F4 E2 01		CP $-8
+   355 01ED FC 41 02		CM $+'T'
+   356 01F0 C9			RET    
+   357 01F1 C0			RNZ 
+   358 01F2 C8			RZ 
+   359 01F3 D0			RNC 
+   360 01F4 D8			RC  
+   361 01F5 E0			RPO
+   362 01F6 E8			RPE 
+   363 01F7 F0			RP 
+   364 01F8 F8			RM 
+   365 			;	RST 0x1234
+   366 01F9 FF			RST 07h
+   367 			;	RST TEST3 
+   368 01FA FF			RST XYZ 
+   369 			;	RST "xyay"
+   370 			;	RST 'l' 
+   371 			;	RST $
+   372 			;	RST $+8
+   373 			;	RST $-8
+   374 			;	RST $+'T'
+   375 01FB E9			PCHL   
+   376 01FC D5			PUSH D  
+   377 01FD C5			PUSH B
+   378 01FE E5			PUSH H
+   379 01FF F5			PUSH PSW
+   380 0200 D1			POP  D  
+   381 0201 C1			POP  B
+   382 0202 E1			POP  H
+   383 0203 F1			POP  PSW
+   384 0204 E3			XTHL   
+   385 0205 F9			SPHL 
+   386 			;	IN  0x1234
+   387 0206 DB 34			IN  low 1234h
+   388 0208 DB 6B			IN  TEST3 
+   389 			;	IN  "xyay"
+   390 020A DB 6C			IN  'l' 
+   391 020C DB 0C			IN  low $
+   392 020E DB 16			IN  low ($+8)
+   393 0210 DB 02			IN  high ($-8)
+   394 0212 DB 66			IN  low ($+'T')
+   395 			;	OUT 0x1234
+   396 0214 D3 12			OUT high 1234h
+   397 0216 D3 6B			OUT TEST3 
+   398 			;	OUT "xyay"
+   399 0218 D3 6C			OUT 'l' 
+   400 021A D3 1A			OUT low $
+   401 021C D3 02			OUT high ($+8)
+   402 021E D3 16			OUT low ($-8)
+   403 0220 D3 02			OUT high ($+'T')
+   404 0222 FB			EI    
+   405 0223 F3			DI    
+   406 0224 76			HLT    
+   407 0225 00			NOP   
+   408
+   409
+   410     			END
+
+
+*******************************************************************************
+                                 Symbols table
+*******************************************************************************
+
+Names		Types	Values
+-----		-----	------
+FRONT		EQU	0001Ch
+BACK		EQU	0001Ch
+XYZ		EQU	00007h
+TEST		Label	0001Ch
+TES1		Label	0001Dh
+TEST2		Label	00057h
+TEST4		Label	0005Dh
+TEST3		Label	0006Bh
+
+Statistics
+----------
+"Name"	= 0
+"EQU"	= 3
+"SET"	= 0
+Labels	= 5
+
+
