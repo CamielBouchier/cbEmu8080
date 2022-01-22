@@ -88,7 +88,7 @@ class cb_8080
 		~cb_8080();
 		
         //
-        void ClockTick();
+        void clock_tick();
 
 		// Reset
 		void Reset();

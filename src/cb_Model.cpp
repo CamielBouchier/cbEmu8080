@@ -106,7 +106,7 @@ void cb_Model::Run(bool SingleStep)
     while (true)
         {
         if (m_RequestStop) break;
-        m_8080->ClockTick();
+        m_8080->clock_tick();
         if (m_8080->m_Halted) break;
         if (SingleStep and (m_8080->m_ProcessorState == m_8080->m_IStates - 1) ) break;
         Ticks++;

@@ -117,7 +117,7 @@ QString cb_8080::Disassemble(const uint16_t Address)
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-void cb_8080::ClockTick() 
+void cb_8080::clock_tick() 
     {
     if (m_ProcessorState == c_StateFetch) 
         {
