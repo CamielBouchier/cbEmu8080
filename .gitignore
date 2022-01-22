@@ -1,5 +1,5 @@
-*.swp
 *.stash
+*.swp
 /cb_emu_8080_resource.rc
 /Makefile
 /object_script.cb_emu_8080
