@@ -33,7 +33,25 @@ from time import strftime
 
 program_name = 'cb_emu_8080.exe'
 
-extra_dirs  = ['Themes']
+extra_dirs  = [
+        'charsets', 
+        'disk_images', 
+        'memory_images', 
+        'themes'
+        ]
+
+extra_files = [
+        'cb_asm_8080/bin/cb_asm_8080.exe',
+        'cpmtools/bin/cpmchattr.exe',
+        'cpmtools/bin/cpmchmod.exe',
+        'cpmtools/bin/cpmcp.exe',
+        'cpmtools/bin/cpmls.exe',
+        'cpmtools/bin/cpmrm.exe',
+        'cpmtools/bin/fsck.cpm.exe',
+        'cpmtools/bin/fsed.cpm.exe',
+        'cpmtools/bin/mkfs.cpm.exe',
+        'cpmtools/bin/diskdefs'
+        ]
 
 this_dir       = os.path.dirname(os.path.realpath(__file__)).replace(os.sep, '/')
 tgt_dir        = f"{this_dir}/dist_windows"
@@ -151,8 +169,6 @@ def cb_copy_others_to_bin():
     Dirs and other resources that need to be packed with dist.
     '''
 
-    files = []
-
     for adir in extra_dirs:
         print(f"{program_name}: copying '{adir}'.")
         try:
@@ -160,10 +176,11 @@ def cb_copy_others_to_bin():
         except OSError as e:
             cb_exit_message(f"Cannot create: {os.strerror(e.errno)}.")
 
-    for afile in files:
+    for afile in extra_files:
         print(f"{program_name}: copying '{afile}'")
+        (dummy, short_afile) = os.path.split(afile)
         try:
-            shutil.copyfile(afile, os.path.join(tgt_dir, afile))
+            shutil.copyfile(afile, os.path.join(tgt_dir, short_afile))
         except OSError as e:
             cb_exit_message(f"Cannot create: {os.strerror(e.errno)}.")
 
@@ -189,7 +206,7 @@ def cb_intro_message():
 
     print()
     print(f"This is {program_name} for cb_emu_8080.")
-    print('(C) 2021 Camiel Bouchier <camiel@bouchier.be>.')
+    print('(C) 2012-2022 Camiel Bouchier <camiel@bouchier.be>.')
     print(f"Running at: {strftime( '%Y-%m-%d %H:%M:%S' , localtime() )}.")
     print()
 

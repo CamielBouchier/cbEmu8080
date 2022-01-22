@@ -1,3 +1,4 @@
+*.exe
 *.stash
 *.swp
 /cb_emu_8080_resource.rc

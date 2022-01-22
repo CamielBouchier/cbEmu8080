@@ -1,4 +1,4 @@
-(C) Camiel Bouchier ( camiel@bouchier.be ) - 2017-2022
+(C) Camiel Bouchier ( camiel@bouchier.be ) - 2012-2022
 
 You are granted a non-exclusive and non-transferable license to use this
 software for personal or internal business purposes.
