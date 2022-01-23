@@ -245,7 +245,7 @@ void cb_DiskArray::DoCommand(const bool Write)
                      m_Drive,
                      C_STRING(m_Parms[m_Drive]->ImageName));
             m_Status = c_Status_WriteError;
-            return;
+            goto label_return;
             }
 
         } 
@@ -261,7 +261,7 @@ void cb_DiskArray::DoCommand(const bool Write)
                      m_Track,
                      m_Sector);
             m_Status = c_Status_ReadError;
-            return;
+            goto label_return;
             }
 
         for (int i=0; i<SectorSize; i++) 
@@ -270,6 +270,7 @@ void cb_DiskArray::DoCommand(const bool Write)
             }
         }
   
+label_return:
     CB_FREE(Buffer);
     }
 

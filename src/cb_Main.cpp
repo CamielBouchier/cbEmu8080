@@ -6,6 +6,8 @@
 //
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+#include <QMessageBox>
+
 #include "cb_Defines.h" 
 #include "cb_emu_8080.h" 
 
@@ -24,37 +26,33 @@ void CustomMessageHandler(const QtMsgType           Type,
         case QtCriticalMsg : Severity = QObject::tr("Critical"); break;
         case QtFatalMsg    : Severity = QObject::tr("Fatal");    break;
         }
-    QString LineMsg = QString::asprintf("(%24s:%5u) - %8s - %s - %s\n",
+    QString LineMsg = QString::asprintf("(%24s:%5u) - %40s - %8s - %s\n",
                                         Context.file, 
                                         Context.line, 
+                                        Context.function,
                                         C_STRING(Severity),
-                                        C_STRING(Message),
-                                        Context.function);
+                                        C_STRING(Message));
 
     // fprintf(stdout, "%p\n", Emu8080); // Check that nullptr during startup.
     fprintf(stdout, C_STRING(LineMsg));
     fflush(stdout);
 
-    switch (Type) 
+    if (Emu8080 and Emu8080->m_LogFile) 
         {
-        case QtDebugMsg :
-        case QtInfoMsg  :
-        case QtWarningMsg:
-        case QtCriticalMsg:
-            if (Emu8080 and Emu8080->m_LogFile) 
-                {
-                fprintf(Emu8080->m_LogFile, C_STRING(LineMsg));
-                fflush(Emu8080->m_LogFile);
-                }
-            break;
-        case QtFatalMsg:
-            if (Emu8080 and Emu8080->m_LogFile) 
-                {
-                fprintf(Emu8080->m_LogFile, C_STRING(LineMsg));
-                fflush(Emu8080->m_LogFile);
-                }
-            Emu8080->OnActionFileExit();
-            abort();
+        fprintf(Emu8080->m_LogFile, C_STRING(LineMsg));
+        fflush(Emu8080->m_LogFile);
+        }
+
+    if (Type == QtWarningMsg)
+        {
+        QMessageBox::warning(NULL, QObject::tr("Warning"), C_STRING(LineMsg));
+        }
+
+    if (Type == QtFatalMsg)
+        {
+        QMessageBox::warning(NULL, QObject::tr("Fatal"), C_STRING(LineMsg));
+        Emu8080->OnActionFileExit();
+        abort();
         }
     }
 

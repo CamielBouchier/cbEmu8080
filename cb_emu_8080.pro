@@ -39,7 +39,7 @@ SOURCES         += $$system(ls src/*.cpp)
 SOURCES         += $$system(ls src/vt_test/*.cpp)
 RESOURCES        = src/cb_emu_8080.qrc
 
-RC_ICONS         = src/icons/cb_emu_8080.ico
+RC_ICONS         = icons/cb_emu_8080.ico
 
 ####################################################################################################
 

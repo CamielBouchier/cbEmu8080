@@ -397,7 +397,7 @@ void cb_emu_8080::InitUserSettings()
 void cb_emu_8080::OnActionFileExit()
     {
     // TODO Do we need some blabla before exiting ?
-    printf("That's all folks ...\n");
+    qInfo() << "That's all folks ...";
 
     // Early in the process exit situation.
     if (not m_MainWindow) 

@@ -320,7 +320,18 @@ void cb_Console::Reset(const bool Hard)
     m_KeyboardCode = 0;
     QLocale KeyboardLocale = QGuiApplication::inputMethod()->locale();
     QString KeyboardName   = KeyboardLocale.name();
-    if (KeyboardName == "nl_BE") 
+    if (KeyboardName == "C") 
+        {
+        // Pretending US.
+        m_KeyboardCode = 1;
+        Map = 1; // Into CharMap.
+        } 
+    else if (KeyboardName == "en_US") 
+        {
+        m_KeyboardCode = 1;
+        Map = 1; // Into CharMap.
+        } 
+    else if (KeyboardName == "nl_BE") 
         {
         m_KeyboardCode = 3;
         Map = 6; // Into CharMap.
@@ -329,12 +340,6 @@ void cb_Console::Reset(const bool Hard)
         {
         m_KeyboardCode = 6;
         Map = 6; // Into CharMap.
-        } 
-    else if (KeyboardName == "C") 
-        {
-        // Pretending US.
-        m_KeyboardCode = 1;
-        Map = 1; // Into CharMap.
         } 
     else 
         {
