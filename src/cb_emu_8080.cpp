@@ -646,10 +646,21 @@ void cb_emu_8080::OnActionEjectDisk()
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-void cb_emu_8080::OnDiskImageLoaded(const bool     Success,
-                                  const int      Drive,
-                                  const QString& ImageFileName)
+void cb_emu_8080::on_disk_image_loaded(const int      load_status,
+                                       const int      Drive,
+                                       const QString& message)
     {
+    if (load_status == cb_DiskArray::c_load_wrong_format or
+        load_status == cb_DiskArray::c_load_could_not_open)
+        {
+        QMessageBox::warning(m_MainWindow, 
+                             tr("Disk not loaded"),
+                             message);
+        }
+
+    bool Success = (load_status == cb_DiskArray::c_load_ok_rw) or
+                   (load_status == cb_DiskArray::c_load_ok_ro);
+
     QPixmap Pixmap;
     Pixmap.load(Success ? ":/cb_emu_8080/icons/circle_blue_13x13.png" : 
                           ":/cb_emu_8080/icons/circle_gray_13x13.png");
@@ -664,7 +675,7 @@ void cb_emu_8080::OnDiskImageLoaded(const bool     Success,
     QString Msg = tr("Right click for options.");
     if (Success)
         {
-        Msg += tr("\nCurrently loaded : %1").arg(ImageFileName);
+        Msg += tr("\nCurrently loaded : %1").arg(message);
         }
     Button->setToolTip(Msg);
     }

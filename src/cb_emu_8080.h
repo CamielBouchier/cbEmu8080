@@ -46,7 +46,7 @@ class cb_emu_8080 : public QApplication
         void OnActionEjectDisk();
         void OnReportSpeed(const float MHz);
         void OnReportHalted(const QString& Msg);
-        void OnDiskImageLoaded(const bool Success, const int Drive, const QString& ImageFileName);
+        void on_disk_image_loaded(const int load_status, const int drive, const QString& message);
         void OnDiskActivity(const int Drive, const bool Write);
         void OnDiskIdle(const int Drive);
         void OnMemoryImageLoaded(const bool Success, const QString& ImageFileName);

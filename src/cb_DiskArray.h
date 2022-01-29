@@ -69,6 +69,12 @@ class cb_DiskArray : public QObject
 
     public:
 
+        static const int c_load_ok_rw            = 0;
+        static const int c_load_ok_ro            = 1;
+        static const int c_load_wrong_format     = 2;
+        static const int c_load_could_not_open   = 3;
+        static const int c_load_no_image         = 4;
+
         static const int c_Status_OK             = 0;
         static const int c_Status_IllegalDrive   = 1;
         static const int c_Status_IllegalTrack   = 2;
@@ -92,7 +98,7 @@ class cb_DiskArray : public QObject
 
     signals : 
 
-        void SignalImageLoaded(const bool Success, const int Drive, const QString& ImageName);
+        void signal_image_loaded(const int load_status, const int drive, const QString& msg);
         void SignalActivity(const int Drive, const bool Write);
 
 

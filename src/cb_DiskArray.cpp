@@ -30,7 +30,7 @@ cb_DiskArray::cb_DiskArray(cb_Model* Model, const QList <cb_DiskParms*>  Parms)
 
     // Putting the signalling back here, ensures the initial load
     // in Reset() - based on user settings - is signalled.
-    connect(this, &cb_DiskArray::SignalImageLoaded, Emu8080, &cb_emu_8080::OnDiskImageLoaded);
+    connect(this, &cb_DiskArray::signal_image_loaded, Emu8080, &cb_emu_8080::on_disk_image_loaded);
 
     Reset();
     }
@@ -157,19 +157,42 @@ void cb_DiskArray::Reset()
         if (m_Parms[i]->ImageName.size() != 0) 
             {
             m_Files[i]->setFileName(m_Parms[i]->ImageName);
-            QFileInfo FInfo(m_Parms[i]->ImageName);
-            bool Writeable = FInfo.isWritable();
-            m_Files[i]->open(Writeable ? QIODevice::ReadWrite : QIODevice::ReadOnly);
-            bool Success = m_Files[i]->isOpen(); 
-            SignalImageLoaded(Success, i, m_Parms[i]->ImageName);
-            if (not Success)
+            QFileInfo file_info(m_Parms[i]->ImageName);
+            uint32_t expected_imagesize = 
+                m_Parms[i]->SectorSize * m_Parms[i]->SPT * m_Parms[i]->NrTracks;
+            if (expected_imagesize != file_info.size())
                 {
+                QString message;
+                message  = tr("Disk: %1\n").arg(QChar('A' + i));
+                message += tr("Image: %1\n").arg(m_Parms[i]->ImageName);
+                message += tr("Expected imagesize: %1\n").arg(expected_imagesize);
+                message += tr("Mounted imagesize: %1").arg(file_info.size());
+                signal_image_loaded(c_load_wrong_format, i, message);
+                continue;
+                }
+            bool is_writeable = file_info.isWritable();
+            m_Files[i]->open(is_writeable ? QIODevice::ReadWrite : QIODevice::ReadOnly);
+            bool is_open = m_Files[i]->isOpen(); 
+            if (not is_open)
+                {
+                QString message;
+                message  = tr("Disk: %1\n").arg(QChar('A' + i));
+                message += tr("Image: %1\n").arg(m_Parms[i]->ImageName);
+                message += tr("Could not open image");
+                signal_image_loaded(c_load_could_not_open, i, m_Parms[i]->ImageName);
                 m_Parms[i]->ImageName.clear();
+                continue;
+                }
+            else
+                {
+                signal_image_loaded(is_writeable?c_load_ok_rw : c_load_ok_ro, 
+                                    i, 
+                                    m_Parms[i]->ImageName);
                 }
             }
         else
             {
-            SignalImageLoaded(false, i, "");
+            signal_image_loaded(c_load_no_image, i, "");
             }
         }
     m_Status = c_Status_OK;

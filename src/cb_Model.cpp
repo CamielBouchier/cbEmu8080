@@ -18,6 +18,7 @@
 cb_Model::cb_Model() 
     {
     m_Running      = false;
+    m_single_stepping      = false;
     m_RequestStop  = false;
     m_RequestReset = false;
     m_HaveError    = false;
@@ -196,6 +197,7 @@ void cb_Model::Run(bool SingleStep)
         }
     m_Running = true;
     m_single_stepping = SingleStep;
+    m_frequency_measure_timer.start();
     }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
