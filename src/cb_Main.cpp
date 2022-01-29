@@ -6,8 +6,6 @@
 //
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#include <QMessageBox>
-
 #include "cb_Defines.h" 
 #include "cb_emu_8080.h" 
 
@@ -43,14 +41,8 @@ void CustomMessageHandler(const QtMsgType           Type,
         fflush(Emu8080->m_LogFile);
         }
 
-    if (Type == QtWarningMsg)
-        {
-        QMessageBox::warning(NULL, QObject::tr("Warning"), C_STRING(LineMsg));
-        }
-
     if (Type == QtFatalMsg)
         {
-        QMessageBox::warning(NULL, QObject::tr("Fatal"), C_STRING(LineMsg));
         Emu8080->OnActionFileExit();
         abort();
         }

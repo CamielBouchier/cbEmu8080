@@ -45,8 +45,10 @@ cb_emu_8080::cb_emu_8080(int& Argc, char* Argv[]) : QApplication(Argc, Argv)
     InstallTheme();
     CreateMainWindow();
     InstallModel();
-    InitUserSettings();
     InitConnects();
+
+    // Last: some signals ought to be triggered ...
+    InitUserSettings();
     }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -71,10 +73,30 @@ void cb_emu_8080::InitConnects()
     connect(W->PB_HardReset,         &QPushButton::clicked, T, [this] { OnReset(true);  } );
     connect(W->PB_SoftReset,         &QPushButton::clicked, T, [this] { OnReset(false); } );
 
-    connect(W->slider_delay_cycles,      
-            &QSlider::valueChanged,
-            this,
-            &cb_emu_8080::on_delay_cycles_changed);
+    connect(m_jiffy_timer,
+            &QTimer::timeout,         
+            m_Model,
+            &cb_Model::on_jiffy_tick);
+
+    connect(m_MainWindow->sb_jiffy_period,
+            static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+            [this](int value) 
+                {
+                m_UserSettings->setValue("emulator/jiffy_period", value);
+                signal_set_jiffy_period(value);
+                m_jiffy_timer->start(value);
+                });
+
+    connect(m_MainWindow->sb_target_frequency,
+            static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+            [this](int value) 
+                {
+                m_UserSettings->setValue("emulator/target_frequency", value);
+                signal_set_target_frequency(value);
+                });
+
+    connect(T, &cb_emu_8080::signal_set_jiffy_period, m_Model, &cb_Model::set_jiffy_period);
+    connect(T, &cb_emu_8080::signal_set_target_frequency, m_Model, &cb_Model::set_target_frequency);
 
     //
     // Memory related
@@ -130,6 +152,11 @@ void cb_emu_8080::InitConnects()
     connect(T,              &cb_emu_8080::SignalRunModel,   m_Model, &cb_Model::Run);
     connect(m_Model,        &cb_Model::SignalReportSpeed,  T,       &cb_emu_8080::OnReportSpeed);
     connect(m_Model,        &cb_Model::SignalReportHalted, T,       &cb_emu_8080::OnReportHalted);
+
+    connect(m_Model,
+            &cb_Model::signal_report_stress, 
+            T,       
+            &cb_emu_8080::on_report_stress);
     }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -185,15 +212,14 @@ void cb_emu_8080::Installize()
         }
     // Log file used in the MessageHandler. (qDebug and friends go to it)
     m_LogFile = fopen( C_STRING(QDir(m_DataLocation).filePath(ProgramName + ".log")), "wt" );
-    // XXX Only from here on we can start using qDebug and friends without crashing !
-    qDebug("DataLocation : '%s'",   C_STRING(m_DataLocation));
+    qDebug() << "DataLocation:" << m_DataLocation;
 
     //
     m_UserSettings =new QSettings( QDir(m_DataLocation).filePath(ProgramName + ".ini") ,
                                    QSettings::IniFormat);
     m_SettingsFileName = m_UserSettings->fileName();
     QFileInfo FileInfo(m_SettingsFileName);
-    qDebug("Settingsfile : %s", C_STRING(m_SettingsFileName));
+    qDebug() << "Settingsfile:" << m_SettingsFileName;
 
 
     // currentPath is also under Windows installation the install dir, even 
@@ -201,7 +227,7 @@ void cb_emu_8080::Installize()
     // (the shortcut sets the start directory)
     QDir MyDir(QDir::currentPath());
     m_BaseDir = MyDir.canonicalPath();
-    qDebug("BaseDir : '%s'",C_STRING(m_BaseDir));
+    qDebug() << "BaseDir:" << m_BaseDir;
 
     // Stuff to copy to the DataLocation
     QStringList ToCopyList;
@@ -226,7 +252,7 @@ void cb_emu_8080::InstallTheme()
     {
     const char* DT = C_STRING(QDir(m_DataLocation).filePath("themes/standard.dlt"));
     m_ThemeFileName = m_UserSettings->value("ThemeFileName", DT).toString();
-    qDebug("ThemeFileName : '%s'", C_STRING(m_ThemeFileName));
+    qDebug() << "ThemeFileName:" << m_ThemeFileName;
 
     // Some init values, knowing we could be called multiple times.
     m_ConstantsInStyleSheet.clear();
@@ -347,6 +373,8 @@ void cb_emu_8080::InstallModel()
     {
     m_Model = new cb_Model();
 
+    m_jiffy_timer = new QTimer(this);
+
     // Console Blinking clock. Keep timers in GUI thread
     m_ConsoleBlinkTimer = new QTimer(this);
     m_ConsoleBlinkTimer->start(500);
@@ -390,6 +418,19 @@ void cb_emu_8080::InitUserSettings()
     {
     SetTraceFileName(m_UserSettings->value("TraceFileName", "").toString());
     SetTraceEnabled(m_UserSettings->value("TraceEnabled", false).toBool());
+
+    QString S1 = "emulator/jiffy_period";
+    m_UserSettings->setValue(S1, m_UserSettings->value(S1, 20).toInt());
+    auto jiffy_period =m_UserSettings->value(S1).toInt();
+    m_MainWindow->sb_jiffy_period->setValue(jiffy_period);
+    signal_set_jiffy_period(jiffy_period);
+    m_jiffy_timer->start(jiffy_period);
+    
+    QString S2 = "emulator/target_frequency";
+    m_UserSettings->setValue(S2, m_UserSettings->value(S2, 2).toInt());
+    auto target_frequency = m_UserSettings->value(S2).toInt();
+    m_MainWindow->sb_target_frequency->setValue(target_frequency);
+    signal_set_target_frequency(target_frequency);
     }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -698,15 +739,6 @@ void cb_emu_8080::OnSelectTraceFile()
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-void cb_emu_8080::on_delay_cycles_changed(const int delay_cycles)
-    {
-    qDebug() << "on_delay_cycles_changed:" << delay_cycles;
-    m_UserSettings->setValue("delay_cycles", delay_cycles);
-    m_Model->set_delay_cycles();
-    }
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 void cb_emu_8080::SetTraceFileName(const QString& FileName)
     {
     m_MainWindow->LE_TraceFileName->setText(FileName);
@@ -746,8 +778,8 @@ void cb_emu_8080::OnReportHalted(const QString& ErrMsg)
     if (ErrMsg.size())
         {
         QMessageBox::warning(m_MainWindow, 
-                             tr("Error"),
-                             tr("Error in model : %1").arg(ErrMsg));
+                             tr("Message from model"),
+                             tr("Message from model:\n%1").arg(ErrMsg));
         }
     DisplayRegisters();
     m_MainWindow->PB_Run->setEnabled(true);
@@ -765,10 +797,22 @@ void cb_emu_8080::OnReportSpeed(const float MHz)
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+void cb_emu_8080::on_report_stress(const QString& message)
+    {
+    if (message.size())
+        {
+        QMessageBox::warning(m_MainWindow, 
+                             tr("Error"),
+                             tr("Error in model : %1").arg(message));
+        }
+    }
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 cb_emu_8080::~cb_emu_8080()
     {
-    qDebug("Start destructor");
-    qDebug("End   destructor");
+    qDebug() << "Start destructor";
+    qDebug() << "End destructor";
     }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

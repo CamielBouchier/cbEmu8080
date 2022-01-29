@@ -73,8 +73,6 @@ cb_Model::cb_Model()
         m_DiskParms << Parms;
         }
     m_DiskArray = new cb_DiskArray(this, m_DiskParms);
-
-    set_delay_cycles();
     }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -91,10 +89,101 @@ cb_Model::~cb_Model()
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-void cb_Model::set_delay_cycles()
+void cb_Model::set_jiffy_period(const int period /*ms*/)  
+    { 
+    if (QThread::currentThread() == qApp->thread())
+        {
+        qFatal("Model supposed to run in separate thread.");
+        }
+    m_jiffy_period = period * 1.0E-3; 
+    m_frequency_measure_timer.start();
+    m_frequency_measure_ticks = 0;
+    }
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+void cb_Model::set_target_frequency(const int frequency /*MHz*/) 
+    { 
+    if (QThread::currentThread() == qApp->thread())
+        {
+        qFatal("Model supposed to run in separate thread.");
+        }
+    m_target_frequency = frequency * 1.0E6; 
+    m_frequency_measure_timer.start();
+    m_frequency_measure_ticks = 0;
+    }
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+void cb_Model::on_jiffy_tick()
     {
-    QSettings* user_settings = Emu8080->m_UserSettings;
-    m_delay_cycles = user_settings->value("delay_cycles", 0).toInt();
+    if (QThread::currentThread() == qApp->thread())
+        {
+        qFatal("Model supposed to run in separate thread.");
+        }
+
+    int   elapsed_ms         = m_frequency_measure_timer.elapsed();
+    float actual_frequency   = float(m_frequency_measure_ticks) / (elapsed_ms / 1.0E3);
+
+    float missed_ticks  = m_target_frequency * (elapsed_ms * 1.0E-3) - m_frequency_measure_ticks;
+    float nr_ticks_per_jiffy = m_jiffy_period * m_target_frequency;
+    if (m_Running and not m_single_stepping and missed_ticks > 10 * nr_ticks_per_jiffy)
+        {
+        m_Running = false;
+        QString message = "Too many missed_ticks: target_frequency too high";
+        qDebug() << message;
+        qDebug() << "m_jiffy_period:" << m_jiffy_period;
+        qDebug() << "nr_ticks_per_jiffy:" << nr_ticks_per_jiffy;
+        qDebug() << "missed_ticks:" << missed_ticks;
+        qDebug() << "actual_frequency:" << actual_frequency;
+        qDebug() << "target_frequency:" << m_target_frequency;
+        signal_report_stress(message);
+        }
+    nr_ticks_per_jiffy += missed_ticks;
+
+    for (uint32_t tick = 0; m_Running and tick < nr_ticks_per_jiffy; tick++)
+        {
+        m_8080->clock_tick();
+        if (m_RequestStop)
+            {
+            m_Running = false;
+            }
+        if (m_8080->m_Halted)
+            {
+            m_Running = false;
+            QString msg;
+            if (m_8080->m_IR == 0166)
+                { 
+                msg = QString::asprintf("HLT at PC=%04XH.", m_8080->RegPC);
+                }
+            else
+                { 
+                msg = QString::asprintf("Illegal instruction: PC=%04XH:%03oQ. Halted.",
+                                        m_8080->RegPC,m_8080->m_IR);
+                }
+            OnError(msg);
+            }
+        if (m_single_stepping and (m_8080->m_ProcessorState == m_8080->m_IStates - 1) )
+            {
+            m_Running = false;
+            }
+        m_frequency_measure_ticks++;
+        }
+
+    if (m_Running)
+        {
+        SignalReportSpeed(actual_frequency/1.0E6);
+        }
+    else
+        {
+        SignalReportSpeed(0);
+        SignalReportHalted(QString());
+        }
+
+    if (m_RequestStop)
+        {
+        OnStop();
+        }
     }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -105,44 +194,8 @@ void cb_Model::Run(bool SingleStep)
         {
         qFatal("Model supposed to run in separate thread.");
         }
-
-    const uint32_t TicksPerCycle = 2 * 1024 * 1024;
-
     m_Running = true;
-
-    uint32_t Ticks = 0;
-    QElapsedTimer Timer;
-    Timer.start();
-    while (true)
-        {
-        if (m_RequestStop) break;
-        m_8080->clock_tick();
-        if (m_8080->m_Halted) break;
-        if (SingleStep and (m_8080->m_ProcessorState == m_8080->m_IStates - 1) ) break;
-        Ticks++;
-        if (Ticks == TicksPerCycle) 
-            {
-            int Elapsed = Timer.elapsed();
-            float FMHz = float(TicksPerCycle) / (Elapsed / 1.0E3) / 1.0E6;
-            SignalReportSpeed(FMHz);
-            Timer.start();
-            Ticks = 0;
-            }
-        // Delay loop. Volatile forces read and avoids optimizing away.
-        if (m_delay_cycles)
-            {
-            for (int volatile i=0; i<m_delay_cycles; i++);
-            }
-        }
-    SignalReportSpeed(0);
-    SignalReportHalted(QString());
-
-    m_Running = false;
-
-    if (m_RequestStop)
-        {
-        OnStop();
-        }
+    m_single_stepping = SingleStep;
     }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

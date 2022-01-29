@@ -50,12 +50,15 @@ class cb_emu_8080 : public QApplication
         void OnDiskActivity(const int Drive, const bool Write);
         void OnDiskIdle(const int Drive);
         void OnMemoryImageLoaded(const bool Success, const QString& ImageFileName);
+        void on_report_stress(const QString& message);
 
     signals :
 
         void SignalRunModel(bool SingleStep);
         void SignalLoadDisk(const int Drive, const QString& ImageFileName);
         void SignalEjectDisk(const int Drive);
+        void signal_set_jiffy_period(const int period);
+        void signal_set_target_frequency(const int frequency);
 
     private :
 
@@ -71,7 +74,6 @@ class cb_emu_8080 : public QApplication
         void OnSelectTraceFile();
         void OnCBDoTrace(const bool Enabled);
         void OnConsoleRefreshRateChanged(const int Rate);  // In Hz.
-        void on_delay_cycles_changed(const int delay_cycles);
 
         static const int c_DisplayMode_Bin = 0;
         static const int c_DisplayMode_Oct = 1;
@@ -103,6 +105,7 @@ class cb_emu_8080 : public QApplication
         QIcon       m_Icon;
         QThread*    m_ModelThread;
 
+        QTimer*     m_jiffy_timer;
         QTimer*     m_ConsoleBlinkTimer;
         QTimer*     m_ConsoleRefreshTimer;
         QTimer*     m_DiskActivityTimer[cb_Model::c_NoDrives];

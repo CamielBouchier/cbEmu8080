@@ -28,8 +28,6 @@ class cb_Model : public QObject
         void    Reset(const bool Hard);
         void    Stop();
 
-        void    set_delay_cycles( /* Argument via user_settings */ );
-
         uint8_t Read   (const uint16_t Address);
         void    Write  (const uint16_t Address, const uint8_t Data);
         uint8_t ReadIO (const uint8_t  Address);
@@ -44,15 +42,26 @@ class cb_Model : public QObject
         QList <class cb_DiskParms*> m_DiskParms;
         class cb_DiskArray*         m_DiskArray;
         
+        void on_jiffy_tick(); 
+
+        void set_jiffy_period(const int period /*ms*/);
+        void set_target_frequency(const int frequency /*MHz*/);
+        
     private :
 
-        int     m_delay_cycles;
+        float m_jiffy_period;       /* sec */
+        float m_target_frequency;   /* Hz  */
+
+        bool    m_single_stepping;
         bool    m_Running;
         bool    m_RequestStop;
         bool    m_RequestReset;
         bool    m_HardReset;
         bool    m_HaveError;
         QString m_ErrorMsg;
+
+        QElapsedTimer m_frequency_measure_timer;
+        uint64_t      m_frequency_measure_ticks;
 
         void    OnStop();
         void    OnError(const QString& ErrMsg);
@@ -61,6 +70,7 @@ class cb_Model : public QObject
     signals :
         void SignalReportSpeed(const float MHz);
         void SignalReportHalted(const QString& ErrMsg);
+        void signal_report_stress(const QString& message);
     };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
