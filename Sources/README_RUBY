@@ -1,0 +1,3 @@
+ruby is not in the build process for the moment.
+Any change in a *.rb should now be manually reflected by 
+ruby cbVtParserGen.rb

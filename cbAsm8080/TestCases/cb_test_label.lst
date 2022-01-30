@@ -1,0 +1,50 @@
+     1 			; vim: syntax=asm ts=8 sw=8 sts=8 sr et columns=100 lines=45
+     2
+     3 			;
+     4 			; Intel 8080-8085 Assembly Language Programming 1977.
+     5 			;
+     6 			; Page 2.3-2.4 on labels
+     7 			;
+     8
+     9 0000 00		FOO:    NOP
+    10 0001 C3 07 00	BAR:    JMP XFOO        ;should be known as label !
+    11 			NOP
+    12 0004 00		?FO1:   NOP
+    13 			?FO2:
+*** Warning 10 in "TestCases/cb_test_label.asm": Invalid label/name character! ("?")
+    14 0005 00		?F?O3:  NOP
+    15 			@FO4:
+    16 0006 00		FO5:NOP
+    17 0007 00		XFOO:   NOP
+    18
+    19 			; Next ones should fail
+    20 			;TOOLONG:NOP
+    21 			;NOCOL1  NOP
+    22 			;_FO6    NOP
+    23 			;NOCOL   NOP
+
+
+*******************************************************************************
+                                 Symbols table
+*******************************************************************************
+
+Names		Types	Values
+-----		-----	------
+FOO		Label	00000h
+BAR		Label	00001h
+NOP		Label	00004h
+?FO1		Label	00004h
+?FO2		Label	00005h
+?FO3		Label	00005h
+@FO4		Label	00006h
+FO5		Label	00006h
+XFOO		Label	00007h
+
+Statistics
+----------
+"Name"	= 0
+"EQU"	= 0
+"SET"	= 0
+Labels	= 9
+
+
